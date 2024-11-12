@@ -1,0 +1,63 @@
+/* Center content and add some padding */
+.page-content {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   padding: 20px;
+   color: #333;
+ }
+ 
+ /* Style the header text */
+ .page-header {
+   font-size: 2em;
+   font-weight: bold;
+   color: #3880ff; /* Ionic's primary color */
+   margin-bottom: 15px;
+   text-align: center;
+ }
+ 
+ /* Card styles */
+ .ion-card {
+   width: 100%;
+   max-width: 500px;
+   margin: 15px 0;
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+   border-radius: 10px;
+ }
+ 
+ .ion-card-header {
+   font-size: 1.2em;
+   font-weight: bold;
+   color: #222;
+   padding: 15px;
+   background-color: #f0f0f5;
+ }
+ 
+ .ion-card-content {
+   font-size: 1em;
+   color: #666;
+   padding: 10px 15px;
+   background-color: #ffffff;
+ }
+ 
+ /* Button styles */
+ .ion-button {
+   --background: #10dc60; /* Success color */
+   --background-hover: #0cc650;
+   --color: #fff;
+   margin-top: 20px;
+   width: 80%;
+   max-width: 300px;
+   font-weight: bold;
+   text-transform: uppercase;
+ }
+ 
+ /* Text styles */
+ .welcome-text {
+   font-size: 1.1em;
+   color: #444;
+   text-align: center;
+   margin: 10px 0 20px;
+   line-height: 1.5;
+ }
+ 
