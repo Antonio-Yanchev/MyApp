@@ -6,14 +6,17 @@ import {
   setupIonicReact,
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
+
 import Tab1 from './pages/Tab1';
 import Tab2 from './pages/Tab2';
 import Tab3 from './pages/Tab3';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import { auth } from './firebaseConfig'; // Import Firebase authentication
 
-/* CSS imports */
+import { auth } from './firebaseConfig'; 
+import { onAuthStateChanged } from 'firebase/auth';
+
+/* Ionic CSS */
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
@@ -33,10 +36,11 @@ const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setLoggedIn(!!user); // Update the state based on user login status
+    // Monitor auth state changes using the v9 function
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setLoggedIn(!!user);
     });
-    return unsubscribe; // Clean up the listener
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -46,18 +50,22 @@ const App: React.FC = () => {
           <Route exact path="/login">
             <Login />
           </Route>
+
           <Route exact path="/register">
             <Register />
           </Route>
+
           <Route exact path="/tab1">
             {loggedIn ? <Tab1 /> : <Redirect to="/login" />}
           </Route>
           <Route exact path="/tab2">
             {loggedIn ? <Tab2 /> : <Redirect to="/login" />}
           </Route>
-          <Route path="/tab3">
+          <Route exact path="/tab3">
             {loggedIn ? <Tab3 /> : <Redirect to="/login" />}
           </Route>
+
+          {/* Default route */}
           <Route exact path="/">
             <Redirect to="/login" />
           </Route>

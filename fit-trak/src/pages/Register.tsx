@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { IonPage, IonContent } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
-import { auth } from '../firebaseConfig'; // Import Firebase authentication
+import { auth } from '../firebaseConfig';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import './LoginRegister.css';
 
 const Register: React.FC = () => {
@@ -11,11 +12,12 @@ const Register: React.FC = () => {
 
   const handleRegister = async () => {
     try {
-      await auth.createUserWithEmailAndPassword(email, password);
+      // Use v9 createUserWithEmailAndPassword(auth, ...)
+      await createUserWithEmailAndPassword(auth, email, password);
       alert('Account created successfully!');
-      history.push('/login'); // Redirect to Login page
-    } catch (error) {
-      alert(error.message); // Show an error message if registration fails
+      history.push('/login');
+    } catch (error: any) {
+      alert(error.message);
     }
   };
 

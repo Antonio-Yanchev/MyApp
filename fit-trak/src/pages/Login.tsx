@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { IonPage, IonContent } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
-import { auth } from '../firebaseConfig'; // Import Firebase authentication
+import { auth } from '../firebaseConfig';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import './LoginRegister.css';
 
 const Login: React.FC = () => {
@@ -11,11 +12,12 @@ const Login: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      await auth.signInWithEmailAndPassword(email, password);
-      localStorage.setItem('username', email); // Save the email in localStorage
-      history.push('/tab1'); // Redirect to Tab1
-    } catch (error) {
-      alert(error.message); // Show an error message if login fails
+      // Use v9 signInWithEmailAndPassword(auth, ...)
+      await signInWithEmailAndPassword(auth, email, password);
+      localStorage.setItem('username', email);
+      history.push('/tab1');
+    } catch (error: any) {
+      alert(error.message);
     }
   };
 
