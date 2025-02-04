@@ -12,15 +12,15 @@ const Login: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      // Use v9 signInWithEmailAndPassword(auth, ...)
-      await signInWithEmailAndPassword(auth, email, password);
-      localStorage.setItem('username', email);
-      history.push('/tab1');
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Login successful:", userCred.user);
+      history.push("/tab1");
     } catch (error: any) {
+      console.error("Login error:", error);
       alert(error.message);
     }
   };
-
+  
   return (
     <IonPage className="page">
       <IonContent>

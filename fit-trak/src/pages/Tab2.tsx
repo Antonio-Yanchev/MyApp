@@ -1,22 +1,30 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
-import './Tab2.css';
+// Tab2.tsx
+import React from 'react';
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+} from '@ionic/react';
+import { User } from 'firebase/auth';
 
-const Tab2: React.FC = () => {
+type Tab2Props = {
+  user: User;
+};
+
+const Tab2: React.FC<Tab2Props> = ({ user }) => {
+  const displayName = user.displayName || user.email;
+
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Tab 2</IonTitle>
+          <IonTitle>Tab2</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Tab 2</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <ExploreContainer name="Tab 2 page" />
+      <IonContent>
+        <h1>Welcome to Tab2, {displayName}!</h1>
       </IonContent>
     </IonPage>
   );
