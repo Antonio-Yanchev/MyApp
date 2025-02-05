@@ -4,6 +4,13 @@ import { Redirect, Route } from 'react-router-dom';
 import {
   IonApp,
   IonRouterOutlet,
+  IonMenu,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonList,
+  IonItem,
   setupIonicReact,
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
@@ -17,7 +24,6 @@ import Tab1 from './pages/Tab1';
 import Tab2 from './pages/Tab2';
 import Tab3 from './pages/Tab3';
 
-/* Ionic CSS Imports */
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
@@ -34,26 +40,48 @@ import './theme/variables.css';
 setupIonicReact();
 
 const App: React.FC = () => {
-  // Store the actual Firebase user object here.
   const [user, setUser] = useState<User | null>(null);
 
-  // onAuthStateChanged sets 'user' whenever Firebase detects sign-in/out.
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
-      console.log("onAuthStateChanged user:", fbUser);
+      console.log('onAuthStateChanged user:', fbUser);
       setUser(fbUser);
     });
     return () => unsubscribe();
   }, []);
 
-  // We can use this boolean to protect routes in a basic way.
   const loggedIn = !!user;
 
   return (
     <IonApp>
       <IonReactRouter>
-        <IonRouterOutlet>
-          {/* Public routes: */}
+        {/* -- The side menu (drawer) -- */}
+        <IonMenu contentId="main-content" side="start">
+          <IonHeader>
+            <IonToolbar color="primary">
+              <IonTitle>Menu</IonTitle>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent>
+            <IonList>
+              {/* These IonItems navigate to Tab1/Tab2/Tab3 */}
+              <IonItem routerLink="/tab1" routerDirection="root">
+                Tab1
+              </IonItem>
+              <IonItem routerLink="/tab2" routerDirection="root">
+                Tab2
+              </IonItem>
+              <IonItem routerLink="/tab3" routerDirection="root">
+                Tab3
+              </IonItem>
+              {/* Add more links as needed */}
+            </IonList>
+          </IonContent>
+        </IonMenu>
+
+        {/* -- Main router outlet, must have the matching id="main-content" -- */}
+        <IonRouterOutlet id="main-content">
+          {/* Public routes */}
           <Route exact path="/login">
             <Login />
           </Route>
@@ -61,7 +89,7 @@ const App: React.FC = () => {
             <Register />
           </Route>
 
-          {/* Protected routes: only show the tab pages if 'user' is not null. */}
+          {/* Protected routes */}
           <Route exact path="/tab1">
             {loggedIn ? <Tab1 user={user!} /> : <Redirect to="/login" />}
           </Route>
@@ -72,7 +100,7 @@ const App: React.FC = () => {
             {loggedIn ? <Tab3 user={user!} /> : <Redirect to="/login" />}
           </Route>
 
-          {/* Default route: redirect to /login if no path is matched. */}
+          {/* Default route */}
           <Route exact path="/">
             <Redirect to="/login" />
           </Route>
