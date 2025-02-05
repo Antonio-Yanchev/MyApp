@@ -70,7 +70,7 @@ const Login: React.FC = () => {
       {/* Fixed footer at the bottom */}
       <IonFooter>
         <IonToolbar color="primary">
-          <IonTitle>© 2023 FIT-TRAK</IonTitle>
+          <IonTitle>© 2025 FIT-TRAK</IonTitle>
         </IonToolbar>
       </IonFooter>
     </IonPage>

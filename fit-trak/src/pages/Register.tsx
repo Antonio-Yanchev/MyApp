@@ -76,7 +76,7 @@ const Register: React.FC = () => {
 
       <IonFooter>
         <IonToolbar color="primary">
-          <IonTitle>© 2023 FIT-TRAK</IonTitle>
+          <IonTitle>© 2025 FIT-TRAK</IonTitle>
         </IonToolbar>
       </IonFooter>
     </IonPage>
