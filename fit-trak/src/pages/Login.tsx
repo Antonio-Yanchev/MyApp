@@ -32,7 +32,7 @@ const Login: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar color="primary">
-          <IonTitle>FIT-TRAK</IonTitle>
+          <IonTitle>Fit-Trak</IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -64,13 +64,18 @@ const Login: React.FC = () => {
           <div className="link" onClick={() => history.push('/register')}>
             Don&apos;t have an account? Register here
           </div>
+
+          {/* NEW LINK for 'Forgot Password?' */}
+          <div className="link" onClick={() => history.push('/forgot-password')}>
+            Forgot Password? Reset it here
+          </div>
         </div>
       </IonContent>
 
       {/* Fixed footer at the bottom */}
       <IonFooter>
         <IonToolbar color="primary">
-          <IonTitle>© 2025 FIT-TRAK</IonTitle>
+          <IonTitle>© 2025 Fit-Trak</IonTitle>
         </IonToolbar>
       </IonFooter>
     </IonPage>

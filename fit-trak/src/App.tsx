@@ -11,6 +11,7 @@ import {
   IonContent,
   IonList,
   IonItem,
+  IonMenuToggle,        // <-- IMPORT HERE
   setupIonicReact,
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
@@ -20,10 +21,12 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Tab1 from './pages/Tab1';
 import Tab2 from './pages/Tab2';
 import Tab3 from './pages/Tab3';
 
+/* Ionic & CSS imports */
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
@@ -34,7 +37,6 @@ import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
-
 import './theme/variables.css';
 
 setupIonicReact();
@@ -56,25 +58,37 @@ const App: React.FC = () => {
     <IonApp>
       <IonReactRouter>
         {/* -- The side menu (drawer) -- */}
-        <IonMenu contentId="main-content" side="start">
+        {/*
+          NOTE: swipeGesture={false} means the user CANNOT open the menu by swiping.
+          If you only have IonMenuButton on Tab1, the menu won't be accessible from Tab2/Tab3.
+        */}
+        <IonMenu contentId="main-content" side="start" swipeGesture={false}>
           <IonHeader>
             <IonToolbar color="primary">
               <IonTitle>Menu</IonTitle>
             </IonToolbar>
           </IonHeader>
+
           <IonContent>
             <IonList>
-              {/* These IonItems navigate to Tab1/Tab2/Tab3 */}
-              <IonItem routerLink="/tab1" routerDirection="root">
-                Tab1
-              </IonItem>
-              <IonItem routerLink="/tab2" routerDirection="root">
-                Tab2
-              </IonItem>
-              <IonItem routerLink="/tab3" routerDirection="root">
-                Tab3
-              </IonItem>
-              {/* Add more links as needed */}
+              {/* IonMenuToggle ensures the menu closes after clicking each item. */}
+              <IonMenuToggle autoHide={false}>
+                <IonItem routerLink="/tab1" routerDirection="root">
+                  Tab1
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem routerLink="/tab2" routerDirection="root">
+                  Tab2
+                </IonItem>
+              </IonMenuToggle>
+
+              <IonMenuToggle autoHide={false}>
+                <IonItem routerLink="/tab3" routerDirection="root">
+                  Tab3
+                </IonItem>
+              </IonMenuToggle>
             </IonList>
           </IonContent>
         </IonMenu>
@@ -87,6 +101,9 @@ const App: React.FC = () => {
           </Route>
           <Route exact path="/register">
             <Register />
+          </Route>
+          <Route exact path="/forgot-password">
+            <ForgotPassword />
           </Route>
 
           {/* Protected routes */}

@@ -8,10 +8,12 @@ import {
   IonButtons,
   IonMenuButton,
   IonButton,
-  IonFooter  // <--- Make sure to import IonFooter
+  IonFooter,
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { User } from 'firebase/auth';
+import { signOut } from 'firebase/auth';         // <-- Import signOut
+import { auth } from '../firebaseConfig';        // <-- Import your auth
 
 type Tab1Props = {
   user: User;
@@ -20,6 +22,18 @@ type Tab1Props = {
 const Tab1: React.FC<Tab1Props> = ({ user }) => {
   const displayName = user.displayName || user.email;
   const history = useHistory();
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log('User signed out');
+      // onAuthStateChanged will set user to null => triggers redirect to /login
+    } catch (error) {
+      console.error('Logout error:', error);
+      alert('Error logging out. Check console for more details.');
+    }
+  };
 
   return (
     <IonPage>
@@ -39,6 +53,11 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
         </IonButton>
         <IonButton routerLink="/tab3" color="secondary">
           Go to Tab3
+        </IonButton>
+
+        {/* Logout button */}
+        <IonButton onClick={handleLogout} color="danger">
+          Logout
         </IonButton>
       </IonContent>
 
