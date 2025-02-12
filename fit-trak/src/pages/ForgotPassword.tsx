@@ -1,4 +1,3 @@
-// ForgotPassword.tsx
 import React, { useState } from 'react';
 import {
   IonPage,
@@ -6,21 +5,24 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonInput,
-  IonItem,
-  IonLabel,
+  IonFooter,
   IonButton,
   IonLoading,
   IonToast
 } from '@ionic/react';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../firebaseConfig'; // adjust the import path to your setup
+import { auth } from '../firebaseConfig';
+
+import { useHistory } from 'react-router-dom';
+import './LoginRegister.css'; // Same CSS as Login, ensuring .input, .button, etc. match
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState('');
   const [showLoader, setShowLoader] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  const history = useHistory();
 
   const handlePasswordReset = async () => {
     if (!email) {
@@ -45,37 +47,54 @@ const ForgotPassword: React.FC = () => {
 
   return (
     <IonPage>
+      {/* Top header (blue bar) */}
       <IonHeader>
-        <IonToolbar>
-          <IonTitle>Reset Password</IonTitle>
+        <IonToolbar color="primary">
+          <IonTitle>Fit-Trak</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">
 
-        <IonItem>
-          <IonLabel position="floating">Email</IonLabel>
-          <IonInput
+      {/* Centered “card” layout, just like Login */}
+      <IonContent className="center-content">
+        <div className="auth-container">
+          <div className="header">Reset Password</div>
+
+          {/* Match the Login input style */}
+          <input
+            className="input"
             type="email"
+            placeholder="Email"
             value={email}
-            onIonChange={(e) => setEmail(e.detail.value!)}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
-        </IonItem>
 
-        <IonButton expand="block" onClick={handlePasswordReset}>
-          Send Reset Link
-        </IonButton>
+          {/* Match the Login button style (e.g., .button) */}
+          <button className="button" onClick={handlePasswordReset}>
+            Send Reset Link
+          </button>
 
-        <IonLoading isOpen={showLoader} message={'Sending reset email...'} />
+          {/* "Back to Login" link */}
+          <div className="link" onClick={() => history.push('/login')}>
+            Back to login
+          </div>
 
-        {/* Toast to display messages (success or error) */}
-        <IonToast
-          isOpen={showToast}
-          onDidDismiss={() => setShowToast(false)}
-          message={toastMessage}
-          duration={3000}
-        />
+          <IonLoading isOpen={showLoader} message={'Sending reset email...'} />
+          <IonToast
+            isOpen={showToast}
+            onDidDismiss={() => setShowToast(false)}
+            message={toastMessage}
+            duration={3000}
+          />
+        </div>
       </IonContent>
+
+      {/* Bottom footer (blue bar) */}
+      <IonFooter>
+        <IonToolbar color="primary">
+          <IonTitle>© 2025 Fit-Trak</IonTitle>
+        </IonToolbar>
+      </IonFooter>
     </IonPage>
   );
 };

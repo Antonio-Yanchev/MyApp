@@ -8,6 +8,9 @@
   padding: 1rem;
 }
 
+
+
+
 .auth-container {
   background: #fff;
   border-radius: 8px;
@@ -56,7 +59,7 @@
   cursor: pointer;
 }
 .button:hover {
-  background-color: #0056b3;
+  background-color: #06f526;
 }
 
 .link {
