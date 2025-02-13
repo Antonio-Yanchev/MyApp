@@ -43,25 +43,27 @@ setupIonicReact();
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);  // Add a loading state
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
       console.log('onAuthStateChanged user:', fbUser);
       setUser(fbUser);
+      setLoading(false); // Stop loading after checking auth state
     });
+
     return () => unsubscribe();
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Show a loading screen while checking auth
+  }
 
   const loggedIn = !!user;
 
   return (
     <IonApp>
       <IonReactRouter>
-        {/* -- The side menu (drawer) -- */}
-        {/*
-          NOTE: swipeGesture={false} means the user CANNOT open the menu by swiping.
-          If you only have IonMenuButton on Tab1, the menu won't be accessible from Tab2/Tab3.
-        */}
         <IonMenu contentId="main-content" side="start" swipeGesture={false}>
           <IonHeader>
             <IonToolbar color="primary">
@@ -71,7 +73,6 @@ const App: React.FC = () => {
 
           <IonContent>
             <IonList>
-              {/* IonMenuToggle ensures the menu closes after clicking each item. */}
               <IonMenuToggle autoHide={false}>
                 <IonItem routerLink="/tab1" routerDirection="root">
                   Tab1
@@ -93,7 +94,6 @@ const App: React.FC = () => {
           </IonContent>
         </IonMenu>
 
-        {/* -- Main router outlet, must have the matching id="main-content" -- */}
         <IonRouterOutlet id="main-content">
           {/* Public routes */}
           <Route exact path="/login">
@@ -119,7 +119,7 @@ const App: React.FC = () => {
 
           {/* Default route */}
           <Route exact path="/">
-            <Redirect to="/login" />
+            {loggedIn ? <Redirect to="/tab1" /> : <Redirect to="/login" />}
           </Route>
         </IonRouterOutlet>
       </IonReactRouter>
