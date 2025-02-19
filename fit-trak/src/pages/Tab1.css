@@ -1,63 +1,162 @@
-/* Center content and add some padding */
-.page-content {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   padding: 20px;
-   color: #333;
- }
- 
- /* Style the header text */
- .page-header {
-   font-size: 2em;
-   font-weight: bold;
-   color: #3880ff; /* Ionic's primary color */
-   margin-bottom: 15px;
-   text-align: center;
- }
- 
- /* Card styles */
- .ion-card {
-   width: 100%;
-   max-width: 500px;
-   margin: 15px 0;
-   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-   border-radius: 10px;
- }
- 
- .ion-card-header {
-   font-size: 1.2em;
-   font-weight: bold;
-   color: #222;
-   padding: 15px;
-   background-color: #f0f0f5;
- }
- 
- .ion-card-content {
-   font-size: 1em;
-   color: #666;
-   padding: 10px 15px;
-   background-color: #ffffff;
- }
- 
- /* Button styles */
- .ion-button {
-   --background: #10dc60; /* Success color */
-   --background-hover: #0cc650;
-   --color: #fff;
-   margin-top: 20px;
-   width: 80%;
-   max-width: 300px;
-   font-weight: bold;
-   text-transform: uppercase;
- }
- 
- /* Text styles */
- .welcome-text {
-   font-size: 1.1em;
-   color: #444;
-   text-align: center;
-   margin: 10px 0 20px;
-   line-height: 1.5;
- }
- 
+/* ===== Reset page background so there's no black area ===== */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #fff; /* Force white background on entire page */
+}
+
+/* ========== Overall Layout ========== */
+.app-container {
+  display: flex;
+  flex-direction: row; /* Sidebar on the left, content on the right */
+  min-height: 100vh;   /* Fill the full browser height */
+  background-color: #fff; /* Make sure container background is white, too */
+}
+
+/* ========== Sidebar ========== */
+.sidebar {
+  width: 250px;
+  background-color: #3880ff;
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+.sidebar .app-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-align: left;
+  width: 100%;
+}
+
+.sidebar ion-button {
+  width: 100%;
+  margin: 8px 0;
+  font-weight: bold;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+/* ========== Main Content ========== */
+.main-content {
+  flex: 1;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* So we can scroll search results if they overflow */
+}
+
+.main-content ion-header {
+  background-color: #3880ff;
+  box-shadow: none;
+}
+
+.main-content ion-toolbar {
+  padding: 0 15px;
+}
+
+.main-content ion-toolbar ion-title {
+  font-size: 1.6rem;
+  color: #fff;
+  text-align: center;
+}
+
+/* ========== Content Container ========== */
+.content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1000px;  /* Helps keep your content area from being too wide on large screens */
+  margin: 0 auto;     /* Centers the content container horizontally */
+}
+
+/* ========== Search Bar ========== */
+.custom-searchbar {
+  --background: #fff;
+  border-radius: 8px;
+  --padding-start: 10px;
+  margin-bottom: 15px;
+  width: 100%; /* Make the search bar fill the content container width */
+}
+
+/* ========== Cards (Search Results / Diary Entries) ========== */
+.card-item {
+  width: 100%;   /* Full width of the content container */
+  margin: 10px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card-item ion-card-header {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #222;
+  padding: 15px;
+  background-color: #f0f0f5;
+}
+
+.card-item ion-card-content {
+  font-size: 1em;
+  color: #666;
+  padding: 10px 15px;
+  background-color: #fff;
+}
+
+/* ========== Diary Overview Title ========== */
+.diary-title {
+  text-align: center;
+  margin: 20px 0 10px;
+  font-size: 1.4em;
+  font-weight: bold;
+}
+
+/* ========== Spinner ========== */
+.spinner-row {
+  margin: 20px 0;
+}
+
+/* ========== Footer ========== */
+.footer-toolbar {
+  background-color: #3880ff;
+  justify-content: center;
+}
+
+.footer-title {
+  color: #fff;
+  font-size: 1em;
+  text-align: center;
+}
+
+/* ========== Responsive Adjustments (Mobile) ========== */
+@media screen and (max-width: 768px) {
+  /* Shrink sidebar and buttons on smaller screens */
+  .sidebar {
+    width: 150px;
+    padding: 10px;
+  }
+
+  .sidebar .app-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  .sidebar ion-button {
+    margin: 5px 0;
+    font-size: 0.9rem;
+  }
+
+  /* Compress content container for narrow devices */
+  .content-container {
+    padding: 10px;
+    max-width: 600px; /* Adjust as needed */
+  }
+}
