@@ -1,0 +1,44 @@
+/* Container that holds sidebar + main content side by side */
+.app-container {
+   display: flex;
+   flex-direction: row;
+   height: 100vh; /* Fill vertical space */
+   width: 100%;
+   margin: 0;
+   padding: 0;
+ }
+ 
+ /* Sidebar styling */
+ .sidebar {
+   width: 250px; /* Adjust if you want it narrower/wider */
+   background-color: #0066ff;
+   padding: 1rem;
+   box-sizing: border-box;
+ }
+ 
+ /* Title in the sidebar */
+ .app-title {
+   color: #fff;
+   text-align: center;
+   margin-bottom: 2rem;
+ }
+ 
+ /* Make sidebar buttons fill width */
+ .sidebar ion-button {
+   margin-bottom: 1rem;
+   width: 100%;
+ }
+ 
+ /* Main content area (Header, Content, Footer) */
+ .main-content {
+   flex: 1; /* Fill remaining space */
+   display: flex;
+   flex-direction: column;
+ }
+ 
+ /* If you want a custom footer style, you can do something like:
+ .footer-toolbar {
+   --background: #0066ff;
+ }
+ */
+ 
