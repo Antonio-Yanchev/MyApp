@@ -6,15 +6,15 @@ import {
   IonTitle,
   IonContent,
   IonFooter,
-  IonButton,
   IonLoading,
   IonToast
 } from '@ionic/react';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
-
 import { useHistory } from 'react-router-dom';
-import './LoginRegister.css'; // Same CSS as Login, ensuring .input, .button, etc. match
+
+// Import your new forgotpassword.css
+import './ForgotPassword.css';
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -47,19 +47,17 @@ const ForgotPassword: React.FC = () => {
 
   return (
     <IonPage>
-      {/* Top header (blue bar) */}
       <IonHeader>
         <IonToolbar color="primary">
           <IonTitle>Fit-Trak</IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      {/* Centered “card” layout, just like Login */}
       <IonContent className="center-content">
         <div className="auth-container">
           <div className="header">Reset Password</div>
 
-          {/* Match the Login input style */}
+          {/* Use the .input class for styling */}
           <input
             className="input"
             type="email"
@@ -69,12 +67,11 @@ const ForgotPassword: React.FC = () => {
             required
           />
 
-          {/* Match the Login button style (e.g., .button) */}
-          <button className="button" onClick={handlePasswordReset}>
+          {/* Use .login-button instead of .button */}
+          <button className="login-button" onClick={handlePasswordReset}>
             Send Reset Link
           </button>
 
-          {/* "Back to Login" link */}
           <div className="link" onClick={() => history.push('/login')}>
             Back to login
           </div>
@@ -89,7 +86,6 @@ const ForgotPassword: React.FC = () => {
         </div>
       </IonContent>
 
-      {/* Bottom footer (blue bar) */}
       <IonFooter>
         <IonToolbar color="primary">
           <IonTitle>© 2025 Fit-Trak</IonTitle>

@@ -36,9 +36,7 @@ const Login: React.FC = () => {
         </IonToolbar>
       </IonHeader>
 
-      {/* Make IonContent fill the screen and use your .center-content class */}
       <IonContent className="center-content">
-        {/* A 'card' in the center for the login form */}
         <div className="auth-container">
           <div className="header">Login</div>
 
@@ -57,7 +55,8 @@ const Login: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <button className="button" onClick={handleLogin}>
+          {/* Updated className here */}
+          <button className="login-button" onClick={handleLogin}>
             Login
           </button>
 
@@ -65,14 +64,12 @@ const Login: React.FC = () => {
             Don&apos;t have an account? Register here
           </div>
 
-          {/* NEW LINK for 'Forgot Password?' */}
           <div className="link" onClick={() => history.push('/forgot-password')}>
             Forgot Password? Reset it here
           </div>
         </div>
       </IonContent>
 
-      {/* Fixed footer at the bottom */}
       <IonFooter>
         <IonToolbar color="primary">
           <IonTitle>© 2025 Fit-Trak</IonTitle>

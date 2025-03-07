@@ -58,13 +58,12 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
   const [results, setResults] = useState<USDAFoodProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
-
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [chartData, setChartData] = useState<any>(null);
 
-  // NEW: State to hold the entries for whichever date is clicked
-  const [selectedDayEntries, setSelectedDayEntries] = useState<DiaryEntry[]>([]); // NEW
+  // For the selected day's entries in the modal
+  const [selectedDayEntries, setSelectedDayEntries] = useState<DiaryEntry[]>([]);
 
   // Logout function
   const handleLogout = async () => {
@@ -77,7 +76,9 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
     }
   };
 
-  // Handle food search using the USDA API
+  /*
+    Handle food search using the USDA API (nutrientNumber approach for sugar = 269).
+  */
   const handleSearch = async () => {
     if (!queryText) return;
     try {
@@ -94,21 +95,26 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
         throw new Error(`USDA API error: ${response.statusText}`);
       }
       const data = await response.json();
+
       if (data.foods) {
-        const formattedResults = data.foods.map((food: any) => ({
-          product_name: food.description,
-          brands: food.brandOwner || 'Unknown',
-          nutriments: {
-            carbohydrates:
-              food.foodNutrients?.find((n: any) => n.nutrientName === 'Carbohydrate, by difference')?.value || 'N/A',
-            protein:
-              food.foodNutrients?.find((n: any) => n.nutrientName === 'Protein')?.value || 'N/A',
-            fat:
-              food.foodNutrients?.find((n: any) => n.nutrientName === 'Total lipid (fat)')?.value || 'N/A',
-            sugars:
-              food.foodNutrients?.find((n: any) => n.nutrientName === 'Sugars')?.value || 'N/A',
-          },
-        }));
+        const formattedResults = data.foods.map((food: any) => {
+          const nutrients = food.foodNutrients || [];
+          const protein = nutrients.find((n: any) => n.nutrientNumber === '203')?.value ?? 'N/A';
+          const fat = nutrients.find((n: any) => n.nutrientNumber === '204')?.value ?? 'N/A';
+          const carbs = nutrients.find((n: any) => n.nutrientNumber === '205')?.value ?? 'N/A';
+          const sugars = nutrients.find((n: any) => n.nutrientNumber === '269')?.value ?? 'N/A';
+
+          return {
+            product_name: food.description,
+            brands: food.brandOwner || 'Unknown',
+            nutriments: {
+              protein,
+              fat,
+              carbohydrates: carbs,
+              sugars,
+            },
+          };
+        });
         setResults(formattedResults);
       } else {
         setResults([]);
@@ -121,7 +127,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
     }
   };
 
-  // Add food to diary and save it to Firestore
+  // Add selected product to the diary
   const handleAddToDiary = async (food: USDAFoodProduct) => {
     const newEntry: DiaryEntry = {
       id: `${Date.now()}-${food.product_name}`,
@@ -139,7 +145,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
     }
   };
 
-  // Fetch diary entries from Firestore on mount or when user.uid changes
+  // Fetch diary entries from Firestore on mount
   useEffect(() => {
     const fetchDiaryEntries = async () => {
       try {
@@ -167,18 +173,17 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
     groupedEntries[entry.date].push(entry);
   });
 
-  // Handle click on a day card to aggregate nutrient data and open the details modal
+  // When a date card is clicked, gather total macros & show modal with chart
   const handleDayCardClick = (date: string) => {
     setSelectedDate(date);
-    const entries = groupedEntries[date];
-
-    // NEW: Remember which entries are for this date, so we can display them in the modal
-    setSelectedDayEntries(entries); // NEW
+    const entries = groupedEntries[date] || [];
+    setSelectedDayEntries(entries);
 
     let totalProtein = 0,
       totalCarbs = 0,
       totalFat = 0,
       totalSugars = 0;
+
     entries.forEach((entry) => {
       totalProtein += Number(entry.food.nutriments?.protein) || 0;
       totalCarbs += Number(entry.food.nutriments?.carbohydrates) || 0;
@@ -201,92 +206,92 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
 
   return (
     <IonPage>
-      {/* Sidebar and main content container */}
-      <div className="app-container">
-        <div className="sidebar">
-          <h2 className="app-title">Fit-Trak</h2>
-          <IonButton expand="block" routerLink="/tab2">Tab2</IonButton>
-          <IonButton expand="block" routerLink="/tab3">Tab3</IonButton>
-          <IonButton expand="block" color="danger" onClick={handleLogout}>
-            Logout
-          </IonButton>
-        </div>
-        <div className="main-content">
-          <IonHeader>
-            <IonToolbar>
-              <IonTitle>Dashboard</IonTitle>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent className="ion-padding">
-            <IonGrid>
-              {/* Search section */}
-              <IonRow>
-                <IonCol size="12">
-              <IonSearchbar
-                placeholder="Search foods..."
-                showClearButton='always'
-                value={queryText}
-                onIonChange={(e) => setQueryText(e.detail.value!)}
-                  onKeyUp={(e) =>{
-                    if(e.key === 'Enter'){
-                      handleSearch();
-                    }
-                  }}
-                onIonClear={() =>{
-                  setQueryText('');
-                  setResults([]);
+      {/* Header (Blue) */}
+      <IonHeader>
+        <IonToolbar color="primary">
+          <IonTitle>Dashboard</IonTitle>
+        </IonToolbar>
+      </IonHeader>
 
-                }}
-                className="customer-searchbar"
-                />
+      {/* IonContent with a full-height layout (sidebar + main) */}
+      <IonContent className="no-scroll">
+        <div className="app-container">
+          {/* ========== Sidebar ========== */}
+          <div className="sidebar">
+            <h2 className="app-title">Fit-Trak</h2>
+            <IonButton expand="block" routerLink="/tab2">
+              Tab2
+            </IonButton>
+            <IonButton routerLink="/tab3">Tab3</IonButton>
+            <IonButton className="logout-button" color="danger" onClick={handleLogout}>
+              Logout
+            </IonButton>
+          </div>
+
+          {/* ========== Main Content ========== */}
+          <div className="main-content">
+            <IonGrid>
+
+              {/* ========== Search bar row ========== */}
+              <IonRow className="ion-justify-content-center">
+                {/* On small screens: 12/12 (full width).
+                    On medium+ screens: 5/12 (~40% width). */}
+                <IonCol size="12" sizeMd="18">
+                  <IonSearchbar
+                    placeholder="Search foods..."
+                    showClearButton="always"
+                    value={queryText}
+                    onIonChange={(e) => setQueryText(e.detail.value!)}
+                    onKeyUp={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSearch();
+                      }
+                    }}
+                    onIonClear={() => {
+                      setQueryText('');
+                      setResults([]);
+                    }}
+                  />
                 </IonCol>
               </IonRow>
-              <IonRow>
-                <IonCol size="12">
-                  <IonButton onClick={handleSearch} color="primary" expand="block">
+
+              {/* ========== Search button row ========== */}
+              <IonRow className="ion-justify-content-center">
+                <IonCol size="12" sizeMd="18">
+                  <IonButton onClick={handleSearch} expand="block">
                     Search
                   </IonButton>
                 </IonCol>
               </IonRow>
 
+              {/* ========== Loading Spinner ========== */}
               {loading && (
-                <IonRow className="spinner-row">
-                  <IonCol className="ion-text-center">
+                <IonRow className="spinner-row ion-justify-content-center">
+                  <IonCol size="12" sizeMd="18">
                     <IonSpinner name="dots" />
                   </IonCol>
                 </IonRow>
               )}
 
-              {/* Display search results if query exists, else show diary overview */}
+              {/* ========== Display search results or diary overview ========== */}
               {queryText ? (
-                <IonRow>
-                  <IonCol size="12">
+                <IonRow className="ion-justify-content-center">
+                  <IonCol size="12" sizeMd="18">
                     <IonList>
                       {results.map((product, index) => (
                         <IonCard key={index} className="card-item">
                           <IonCardHeader>
-                            <IonCardTitle>
-                              {product.product_name || 'Unnamed product'}
-                            </IonCardTitle>
+                            <IonCardTitle>{product.product_name || 'Unnamed product'}</IonCardTitle>
                           </IonCardHeader>
                           <IonCardContent>
-                            {product.brands && (
-                              <p className="brand-text">
-                                Brand: {product.brands}
-                              </p>
-                            )}
-                            {product.nutriments && (
-                              <p className="nutrient-text">
-                                Carbs: {product.nutriments.carbohydrates ?? 'N/A'}g | Protein:{' '}
-                                {product.nutriments.protein ?? 'N/A'}g | Fat:{' '}
-                                {product.nutriments.fat ?? 'N/A'}g
-                              </p>
-                            )}
-                            <IonButton
-                              onClick={() => handleAddToDiary(product)}
-                              color="secondary"
-                              size="small"
-                            >
+                            {product.brands && <p>Brand: {product.brands}</p>}
+                            <p>
+                              Carbs: {product.nutriments?.carbohydrates ?? 'N/A'}g |{' '}
+                              Protein: {product.nutriments?.protein ?? 'N/A'}g |{' '}
+                              Fat: {product.nutriments?.fat ?? 'N/A'}g |{' '}
+                              Sugars: {product.nutriments?.sugars ?? 'N/A'}g
+                            </p>
+                            <IonButton onClick={() => handleAddToDiary(product)} color="secondary" size="small">
                               Add to Diary
                             </IonButton>
                           </IonCardContent>
@@ -297,108 +302,104 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
                 </IonRow>
               ) : (
                 <>
-                  <IonRow>
-                    <IonCol size="12">
+                  <IonRow className="ion-justify-content-center">
+                    <IonCol size="12" sizeMd="18">
                       <h2 className="diary-title">Your Diary Overview</h2>
                     </IonCol>
                   </IonRow>
+
                   {Object.keys(groupedEntries).length === 0 ? (
-                    <IonRow>
-                      <IonCol size="12">
-                        <p className="no-entries">
-                          No diary entries yet. Add some food items!
-                        </p>
+                    <IonRow className="ion-justify-content-center">
+                      <IonCol size="12" sizeMd="18">
+                        <p>No diary entries yet. Add some food items!</p>
                       </IonCol>
                     </IonRow>
                   ) : (
-                    Object.keys(groupedEntries).map((date) => (
-                      <IonRow key={date}>
-                        <IonCol size="12">
-                          <IonCard onClick={() => handleDayCardClick(date)} className="day-card">
-                            <IonCardHeader>
-                              <IonCardTitle>{date}</IonCardTitle>
-                            </IonCardHeader>
-                            <IonCardContent>
-                              {(() => {
-                                const entries = groupedEntries[date];
-                                let totalProtein = 0,
-                                  totalCarbs = 0,
-                                  totalFat = 0,
-                                  totalSugars = 0;
-                                entries.forEach((entry) => {
-                                  totalProtein += Number(entry.food.nutriments?.protein) || 0;
-                                  totalCarbs += Number(entry.food.nutriments?.carbohydrates) || 0;
-                                  totalFat += Number(entry.food.nutriments?.fat) || 0;
-                                  totalSugars += Number(entry.food.nutriments?.sugars) || 0;
-                                });
-                                return (
-                                  <>
-                                    <p>Protein: {totalProtein}g</p>
-                                    <p>Carbs: {totalCarbs}g</p>
-                                    <p>Fat: {totalFat}g</p>
-                                    <p>Sugars: {totalSugars}g</p>
-                                  </>
-                                );
-                              })()}
-                              <IonButton expand="block" color="secondary">
-                                View Details
-                              </IonButton>
-                            </IonCardContent>
-                          </IonCard>
-                        </IonCol>
-                      </IonRow>
-                    ))
+                    Object.keys(groupedEntries).map((date) => {
+                      const entries = groupedEntries[date];
+                      let totalProtein = 0,
+                        totalCarbs = 0,
+                        totalFat = 0,
+                        totalSugars = 0;
+
+                      entries.forEach((entry) => {
+                        totalProtein += Number(entry.food.nutriments?.protein) || 0;
+                        totalCarbs += Number(entry.food.nutriments?.carbohydrates) || 0;
+                        totalFat += Number(entry.food.nutriments?.fat) || 0;
+                        totalSugars += Number(entry.food.nutriments?.sugars) || 0;
+                      });
+
+                      return (
+                        <IonRow key={date} className="ion-justify-content-center">
+                          <IonCol size="12" sizeMd="18">
+                            <IonCard
+                              className="card-item"
+                              onClick={() => handleDayCardClick(date)}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              <IonCardHeader>
+                                <IonCardTitle>{date}</IonCardTitle>
+                              </IonCardHeader>
+                              <IonCardContent>
+                                <p>Protein: {totalProtein}g</p>
+                                <p>Carbs: {totalCarbs}g</p>
+                                <p>Fat: {totalFat}g</p>
+                                <p>Sugars: {totalSugars}g</p>
+                                <IonButton expand="block">View Details</IonButton>
+                              </IonCardContent>
+                            </IonCard>
+                          </IonCol>
+                        </IonRow>
+                      );
+                    })
                   )}
                 </>
               )}
             </IonGrid>
-          </IonContent>
-          <IonFooter>
-            <IonToolbar className="footer-toolbar">
-              <IonTitle className="footer-title">© 2025 FIT-TRAK</IonTitle>
-            </IonToolbar>
-          </IonFooter>
+          </div>
         </div>
-      </div>
+      </IonContent>
 
-      {/* Modal for day details with a pie chart AND list of items */}
+      {/* ========== Blue Footer ========== */}
+      <IonFooter>
+        <IonToolbar color="primary">
+          <IonTitle className="footer-title">© 2025 FIT-TRAK</IonTitle>
+        </IonToolbar>
+      </IonFooter>
+
+      {/* ========== Modal for Day Details ========== */}
       <IonModal isOpen={modalOpen} onDidDismiss={() => setModalOpen(false)}>
-  <IonHeader>
-    <IonToolbar color="primary">
-      <IonTitle>Details for {selectedDate}</IonTitle>
-      {/* REMOVE the Close button here */}
-    </IonToolbar>
-  </IonHeader>
-
-  <IonContent className="ion-padding">
-    {/* Pie chart and list of day items */}
-    {chartData ? <Pie data={chartData} /> : <p>Loading chart data...</p>}
-    <IonList>
-      {selectedDayEntries.map((entry) => (
-        <IonItem key={entry.id}>
-          <IonLabel>
-            <h2>{entry.food.product_name}</h2>
-            <p>
-              Carbs: {entry.food.nutriments?.carbohydrates ?? 'N/A'}g |
-              Protein: {entry.food.nutriments?.protein ?? 'N/A'}g |
-              Fat: {entry.food.nutriments?.fat ?? 'N/A'}g |
-              Sugars: {entry.food.nutriments?.sugars ?? 'N/A'}g
-            </p>
-          </IonLabel>
-        </IonItem>
-      ))}
-    </IonList>
-  </IonContent>
-
-  {/* NEW: Footer that pins the Close button at the bottom */}
-  <IonFooter>
-    <IonToolbar>
-      <IonButton expand="block" onClick={() => setModalOpen(false)}>
-        Close
-      </IonButton>
-    </IonToolbar>
-  </IonFooter>
-</IonModal>
+        <IonHeader>
+          <IonToolbar color="primary">
+            <IonTitle>Details for {selectedDate}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {chartData ? <Pie data={chartData} /> : <p>Loading chart data...</p>}
+          <IonList>
+            {selectedDayEntries.map((entry) => (
+              <IonItem key={entry.id}>
+                <IonLabel>
+                  <h2>{entry.food.product_name}</h2>
+                  <p>
+                    Carbs: {entry.food.nutriments?.carbohydrates ?? 'N/A'}g |{' '}
+                    Protein: {entry.food.nutriments?.protein ?? 'N/A'}g |{' '}
+                    Fat: {entry.food.nutriments?.fat ?? 'N/A'}g |{' '}
+                    Sugars: {entry.food.nutriments?.sugars ?? 'N/A'}g
+                  </p>
+                </IonLabel>
+              </IonItem>
+            ))}
+          </IonList>
+        </IonContent>
+        <IonFooter>
+          <IonToolbar>
+            <IonButton expand="block" onClick={() => setModalOpen(false)}>
+              Close
+            </IonButton>
+          </IonToolbar>
+        </IonFooter>
+      </IonModal>
     </IonPage>
   );
 };

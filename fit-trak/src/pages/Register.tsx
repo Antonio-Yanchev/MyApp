@@ -44,6 +44,7 @@ const Register: React.FC = () => {
       <IonContent className="center-content">
         <div className="auth-container">
           <div className="header">Register</div>
+
           <input
             className="input"
             type="text"
@@ -65,9 +66,12 @@ const Register: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button className="button" onClick={handleRegister}>
+
+          {/* Updated className here */}
+          <button className="login-button" onClick={handleRegister}>
             Register
           </button>
+
           <div className="link" onClick={() => history.push('/login')}>
             Already have an account? Login here
           </div>

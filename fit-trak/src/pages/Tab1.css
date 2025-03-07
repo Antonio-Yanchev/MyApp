@@ -1,162 +1,169 @@
-/* ===== Reset page background so there's no black area ===== */
+:root {
+  /* Primary color overrides */
+  --ion-color-primary: #3880ff;
+  --ion-color-primary-rgb: 56,128,255;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255,255,255;
+  --ion-color-primary-shade: #3171e0;
+  --ion-color-primary-tint: #4c8dff;
+}
+
+/* Ensure full-height for IonContent elements */
 html,
-body {
+body,
+ion-app,
+ion-content {
+  height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #fff; /* Force white background on entire page */
 }
 
-/* ========== Overall Layout ========== */
+/* Consistent full-height usage for IonContent */
+.no-scroll {
+  --ion-background-color: #fff;
+  height: 100%;
+}
+
+/* ================== Button Styling ================== */
+ion-button {
+  --background: var(--ion-color-primary) !important;
+  --background-hover: var(--ion-color-primary) !important;
+  --background-focused: var(--ion-color-primary) !important;
+  --background-activated: var(--ion-color-primary) !important;
+  color: #fff !important;
+  text-transform: uppercase;
+  font-weight: bold;
+  /* Make buttons bigger */
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --padding-start: 24px;
+  --padding-end: 24px;
+  font-size: 1.3rem; /* bigger button text */
+}
+
+ion-button:hover,
+ion-button:focus,
+ion-button:active {
+  filter: brightness(0.9);
+}
+
+/* ================== App Container (Sidebar + Main Content) ================== */
 .app-container {
   display: flex;
-  flex-direction: row; /* Sidebar on the left, content on the right */
-  min-height: 100vh;   /* Fill the full browser height */
-  background-color: #fff; /* Make sure container background is white, too */
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  background-color: #fff;
 }
 
-/* ========== Sidebar ========== */
+/* ================== Sidebar ================== */
 .sidebar {
-  width: 250px;
-  background-color: #3880ff;
+  width: 250px; /* Reduce sidebar width to give more space to main content */
+  background-color: #0066ff;
   color: #fff;
-  padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   box-sizing: border-box;
+  padding: 20px;
+  height: 100%;
+  padding: 1rem;
 }
 
 .sidebar .app-title {
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: bold;
   margin-bottom: 30px;
   text-align: left;
-  width: 100%;
 }
 
-.sidebar ion-button {
-  width: 100%;
-  margin: 8px 0;
-  font-weight: bold;
-  text-transform: uppercase;
-  align-self: flex-start;
-}
-
-/* ========== Main Content ========== */
+/* ================== Main Content ================== */
 .main-content {
   flex: 1;
   background-color: #f9f9f9;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; /* So we can scroll search results if they overflow */
+  overflow-y: auto;
+  box-sizing: border-box;
+  /* Make everything bigger in main content */
+  font-size: 1.4rem; 
+  padding: 20px;
 }
 
-.main-content ion-header {
-  background-color: #3880ff;
-  box-shadow: none;
-}
 
-.main-content ion-toolbar {
-  padding: 0 15px;
-}
-
-.main-content ion-toolbar ion-title {
+/* ================== Enlarge the Search Bar ================== */
+ion-searchbar {
+  width: 100%;
+  /* Increase vertical padding for a much taller bar */
+  --padding-top: 30px; 
+  --padding-bottom: 30px;
+  /* Increase icon size and placeholder text */
+  --icon-size: 2rem;
+  --placeholder-font-size: 1.6rem;
+  /* Increase typed text size */
   font-size: 1.6rem;
-  color: #fff;
+  margin-bottom: 20px; 
+  border-radius: 8px; /* Slight rounding if you like */
+}
+
+/* ================== Spinner Row ================== */
+.spinner-row {
+  margin: 20px 0;
   text-align: center;
 }
 
-/* ========== Content Container ========== */
-.content-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 20px;
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 1000px;  /* Helps keep your content area from being too wide on large screens */
-  margin: 0 auto;     /* Centers the content container horizontally */
-}
-
-/* ========== Search Bar ========== */
-.custom-searchbar {
-  --background: #fff;
-  border-radius: 8px;
-  --padding-start: 10px;
-  margin-bottom: 15px;
-  width: 100%; /* Make the search bar fill the content container width */
-}
-
-/* ========== Cards (Search Results / Diary Entries) ========== */
+/* ================== Daily Recording (Card) Boxes ================== */
 .card-item {
-  width: 100%;   /* Full width of the content container */
-  margin: 10px 0;
-  border-radius: 10px;
+  width: 100%;
+  margin: 25px 0;       /* Bigger spacing between cards */
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: 1.4rem;    /* Increase text size in the card */
+  min-height: 180px;    /* Ensure a taller card box */
 }
 
 .card-item ion-card-header {
-  font-size: 1.2em;
+  font-size: 1.6rem;    /* Larger header (date/title) */
   font-weight: bold;
   color: #222;
-  padding: 15px;
+  padding: 20px;        /* More padding for a bigger header section */
   background-color: #f0f0f5;
 }
 
 .card-item ion-card-content {
-  font-size: 1em;
-  color: #666;
-  padding: 10px 15px;
+  font-size: 1.4rem;
+  color: #000;
+  padding: 20px;        /* Increase content padding */
   background-color: #fff;
 }
 
-/* ========== Diary Overview Title ========== */
+/* ================== Diary Overview Title ================== */
 .diary-title {
   text-align: center;
   margin: 20px 0 10px;
-  font-size: 1.4em;
+  font-size: 2rem;    /* Make the "Your Diary Overview" text large */
   font-weight: bold;
 }
 
-/* ========== Spinner ========== */
-.spinner-row {
-  margin: 20px 0;
-}
-
-/* ========== Footer ========== */
-.footer-toolbar {
-  background-color: #3880ff;
-  justify-content: center;
-}
-
+/* ================== Footer Text ================== */
 .footer-title {
   color: #fff;
-  font-size: 1em;
   text-align: center;
+  font-size: 1.2rem; /* Slightly bigger footer text */
 }
 
-/* ========== Responsive Adjustments (Mobile) ========== */
+/* ================== Responsive Adjustments (Mobile) ================== */
 @media screen and (max-width: 768px) {
-  /* Shrink sidebar and buttons on smaller screens */
   .sidebar {
     width: 150px;
     padding: 10px;
   }
-
   .sidebar .app-title {
     font-size: 1.5rem;
     margin-bottom: 10px;
   }
-
   .sidebar ion-button {
     margin: 5px 0;
-    font-size: 0.9rem;
-  }
-
-  /* Compress content container for narrow devices */
-  .content-container {
-    padding: 10px;
-    max-width: 600px; /* Adjust as needed */
+    font-size: 1rem;
   }
 }

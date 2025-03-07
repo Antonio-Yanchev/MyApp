@@ -148,10 +148,10 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
 
   return (
     <IonPage>
-      <div className="app-container">
+      <div className="tab2-app-container">
         {/* Sidebar */}
-        <div className="sidebar">
-          <h2 className="app-title">Fit-Trak</h2>
+        <div className="tab2-sidebar">
+          <h2 className="tab2-app-title">Fit-Trak</h2>
           <IonButton expand="block" routerLink="/tab1">
             Tab1
           </IonButton>
@@ -164,7 +164,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
         </div>
 
         {/* Main Content */}
-        <div className="main-content">
+        <div className="tab2-main-content">
           <IonHeader>
             <IonToolbar>
               <IonTitle>Record Exercise</IonTitle>
