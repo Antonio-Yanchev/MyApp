@@ -1,44 +1,70 @@
 /* Container that holds sidebar + main content side by side */
 .tab2-app-container {
-   display: flex;
-   flex-direction: row;
-   height: 100vh; /* Fill vertical space */
-   width: 100%;
-   margin: 0;
-   padding: 0;
- }
- 
- /* Sidebar styling */
- .tab2-sidebar {
-   width: 250px; /* Adjust if you want it narrower/wider */
-   background-color: #0066ff;
-   padding: 1rem;
-   box-sizing: border-box;
- }
- 
- /* Title in the sidebar */
- .tab2-app-title {
-   color: #fff;
-   text-align: center;
-   margin-bottom: 2rem;
- }
- 
- /* Make sidebar buttons fill width */
- .tab2-sidebar ion-button {
-   margin-bottom: 1rem;
-   width: 100%;
- }
- 
- /* Main content area (Header, Content, Footer) */
- .tab2-main-content {
-   flex: 1; /* Fill remaining space */
-   display: flex;
-   flex-direction: column;
- }
- 
- /* If you want a custom footer style, you can do something like:
- .footer-toolbar {
-   --background: #0066ff;
- }
- */
- 
+  display: flex;
+  flex-direction: row;
+  height: 100vh; /* Fill vertical space */
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Sidebar styling */
+.tab2-sidebar {
+  width: 250px; /* Adjust if you want it narrower/wider */
+  background-color: #0066ff;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* Title in the sidebar */
+.tab2-app-title {
+  
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 2rem;
+}
+
+/* Make sidebar buttons fill the sidebar width */
+.tab2-sidebar ion-button {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+/* Main content area (Header, Content, Footer) */
+.tab2-main-content {
+  flex: 1; /* Fill remaining space */
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================
+   EDIT & DELETE BUTTONS
+   ========================= */
+
+/* When using IonButton with class="edit-button" */
+.ion-button.edit-button {
+  --background: #007bff;    /* Blue background */
+  --color: #ffffff;         /* White text */
+  --border-radius: 4px;
+  --padding-start: 0.6rem;
+  --padding-end: 0.6rem;
+  --padding-top: 0.3rem;
+  --padding-bottom: 0.3rem;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;  /* spacing between edit & delete */
+}
+
+/* When using IonButton with class="delete-button" */
+.ion-button.delete-button {
+  --background: #dc3545;    /* Red background */
+  --color: #ffffff;         /* White text */
+  --border-radius: 4px;
+  --padding-start: 0.6rem;
+  --padding-end: 0.6rem;
+  --padding-top: 0.3rem;
+  --padding-bottom: 0.3rem;
+  font-size: 0.85rem;
+}

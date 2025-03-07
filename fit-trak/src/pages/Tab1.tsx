@@ -220,7 +220,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
           <div className="sidebar">
             <h2 className="app-title">Fit-Trak</h2>
             <IonButton expand="block" routerLink="/tab2">
-              Tab2
+              Record Exercises
             </IonButton>
             <IonButton routerLink="/tab3">Tab3</IonButton>
             <IonButton className="logout-button" color="danger" onClick={handleLogout}>
@@ -236,7 +236,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
               <IonRow className="ion-justify-content-center">
                 {/* On small screens: 12/12 (full width).
                     On medium+ screens: 5/12 (~40% width). */}
-                <IonCol size="12" sizeMd="18">
+                <IonCol size="12" sizeMd="12">
                   <IonSearchbar
                     placeholder="Search foods..."
                     showClearButton="always"
@@ -257,7 +257,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
 
               {/* ========== Search button row ========== */}
               <IonRow className="ion-justify-content-center">
-                <IonCol size="12" sizeMd="18">
+                <IonCol size="12" sizeMd="12">
                   <IonButton onClick={handleSearch} expand="block">
                     Search
                   </IonButton>
@@ -267,7 +267,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
               {/* ========== Loading Spinner ========== */}
               {loading && (
                 <IonRow className="spinner-row ion-justify-content-center">
-                  <IonCol size="12" sizeMd="18">
+                  <IonCol size="12" sizeMd="12">
                     <IonSpinner name="dots" />
                   </IonCol>
                 </IonRow>
@@ -276,7 +276,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
               {/* ========== Display search results or diary overview ========== */}
               {queryText ? (
                 <IonRow className="ion-justify-content-center">
-                  <IonCol size="12" sizeMd="18">
+                  <IonCol size="12" sizeMd="12">
                     <IonList>
                       {results.map((product, index) => (
                         <IonCard key={index} className="card-item">
@@ -303,14 +303,14 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
               ) : (
                 <>
                   <IonRow className="ion-justify-content-center">
-                    <IonCol size="12" sizeMd="18">
-                      <h2 className="diary-title">Your Diary Overview</h2>
+                    <IonCol size="12" sizeMd="12">
+                      <h1 className="diary-title">Your Exercise Overview:</h1>
                     </IonCol>
                   </IonRow>
 
                   {Object.keys(groupedEntries).length === 0 ? (
                     <IonRow className="ion-justify-content-center">
-                      <IonCol size="12" sizeMd="18">
+                      <IonCol size="12" sizeMd="12">
                         <p>No diary entries yet. Add some food items!</p>
                       </IonCol>
                     </IonRow>
@@ -331,7 +331,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
 
                       return (
                         <IonRow key={date} className="ion-justify-content-center">
-                          <IonCol size="12" sizeMd="18">
+                          <IonCol size="12" sizeMd="12">
                             <IonCard
                               className="card-item"
                               onClick={() => handleDayCardClick(date)}
