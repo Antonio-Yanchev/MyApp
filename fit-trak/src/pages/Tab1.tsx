@@ -209,7 +209,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
       {/* Header (Blue) */}
       <IonHeader>
         <IonToolbar color="primary">
-          <IonTitle>Dashboard</IonTitle>
+          <IonTitle><h1>Fit-Trak</h1></IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -218,7 +218,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
         <div className="app-container">
           {/* ========== Sidebar ========== */}
           <div className="sidebar">
-            <h2 className="app-title">Fit-Trak</h2>
+            <h2 className="app-title">Dashboard</h2>
             <IonButton expand="block" routerLink="/tab2">
               Record Exercises
             </IonButton>

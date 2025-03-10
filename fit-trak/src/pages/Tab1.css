@@ -47,6 +47,8 @@ ion-button:active {
   filter: brightness(0.9);
 }
 
+
+
 /* ================== App Container (Sidebar + Main Content) ================== */
 .app-container {
   display: flex;
@@ -70,7 +72,7 @@ ion-button:active {
 }
 
 .sidebar .app-title {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 30px;
   text-align: center;
@@ -88,6 +90,17 @@ ion-button:active {
   font-size: 1.4rem; 
   padding: 20px;
 }
+
+/* Give all sidebar buttons some spacing except the logout button */
+.sidebar ion-button:not(.logout-button) {
+  margin-bottom: 2rem; /* Adjust as needed */
+}
+
+/* Keep the logout button at the bottom */
+.logout-button {
+  margin-top: auto;
+}
+
 
 
 /* ================== Enlarge the Search Bar ================== */
@@ -123,13 +136,11 @@ ion-searchbar {
   min-height: 180px;    /* Ensure a taller card box */
 }
 
-.card-item ion-card-header {
-  font-size: 1.6rem;    /* Larger header (date/title) */
-  font-weight: bold;
-  color: #222;
-  padding: 30px;        /* More padding for a bigger header section */
-  background-color: #f0f0f5;
+.logout-button {
+  margin-top: auto;
 }
+
+
 
 .card-item ion-card-content {
   font-size: 1.4rem;
@@ -142,7 +153,7 @@ ion-searchbar {
 .diary-title {
   text-align: center;
   margin: 20px 0 10px;
-  font-size: 7rem;   
+  font-size: 5rem;   
   font-weight: bold;
 }
 

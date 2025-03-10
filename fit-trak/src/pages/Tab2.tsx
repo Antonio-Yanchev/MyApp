@@ -409,7 +409,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
       <div className="tab2-app-container">
         {/* Sidebar */}
         <div className="tab2-sidebar">
-          <h2 className="tab2-app-title">Fit-Trak</h2>
+          <h2 className="tab2-app-title">Dashboard</h2>
           {/* Removed the Profile button from here */}
           <IonButton expand="block" routerLink="/tab1">
             Dairy recording
