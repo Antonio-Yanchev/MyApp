@@ -415,7 +415,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
             Dairy recording
           </IonButton>
           <IonButton expand="block" routerLink="/tab3">
-            Tab3
+            Generate Meal Plan
           </IonButton>
           <IonButton expand="block" color="danger" onClick={handleLogout}>
             Logout

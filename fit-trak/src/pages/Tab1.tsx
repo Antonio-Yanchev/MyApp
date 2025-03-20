@@ -222,7 +222,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
             <IonButton expand="block" routerLink="/tab2">
               Record Exercises
             </IonButton>
-            <IonButton routerLink="/tab3">Tab3</IonButton>
+            <IonButton routerLink="/tab3">Test</IonButton>
             <IonButton className="logout-button" color="danger" onClick={handleLogout}>
               Logout
             </IonButton>

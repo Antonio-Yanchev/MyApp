@@ -1,0 +1,62 @@
+/* A handy utility to remove IonContent's default scrolling and let us handle layout ourselves */
+.no-scroll {
+   --ion-background-color: #fff;
+   height: 100%;
+ }
+ 
+ /* Container that holds the sidebar and the main content side by side */
+ .app-container {
+   display: flex;
+   flex-direction: row;
+   height: 100%;
+   width: 100%;
+   background-color: #fff; 
+ }
+ 
+ /* Sidebar on the left */
+ .sidebar {
+   width: 250px;
+   background-color: #007aff; 
+   color: #fff;
+   display: flex;
+   flex-direction: column;
+   box-sizing: border-box;
+   padding: 1rem;
+ }
+ 
+ /* Title inside the sidebar */
+ .sidebar .app-title {
+   font-size: 2rem;
+   font-weight: bold;
+   text-align: center;
+   margin-bottom: 1.5rem;
+ }
+ 
+ /* Button that sits at the bottom of the sidebar */
+ .logout-button {
+   margin-top: auto;
+ }
+ 
+ /* The main content area to the right of the sidebar */
+ .main-content {
+   flex: 1;
+   background-color: #f9f9f9;
+   display: flex;
+   flex-direction: column;
+   box-sizing: border-box;
+   padding: 1rem;
+ }
+ 
+ /* That bar containing the "Generate Plan" button */
+ .generate-plan-bar {
+   margin-top: 1.5rem;
+   background-color: #007aff;
+   color: #fff;
+   text-align: right;
+   padding: 0.75rem 1rem;
+ }
+ 
+ .generate-plan-bar ion-button {
+   --background: #005be1;
+ }
+ 
