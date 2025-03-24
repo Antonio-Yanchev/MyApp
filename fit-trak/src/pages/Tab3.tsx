@@ -39,8 +39,8 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 // -------------- TYPES --------------
 type Ingredient = {
-  item: string;       // e.g. "chicken breast"
-  quantity: string;   // e.g. "200g", "2 eggs"
+  item: string;
+  quantity: string; 
 };
 
 type Meal = {
@@ -55,9 +55,10 @@ type Meal = {
   };
 };
 
+// Note: workout might come back as a string or object (depending on GPT's formatting).
 type ChatGPTResult = {
   meals: Meal[];
-  workout: string;
+  workout: string | Record<string, any>;
 };
 
 type Tab3Props = {
@@ -67,9 +68,9 @@ type Tab3Props = {
 const Tab3: React.FC<Tab3Props> = ({ user }) => {
   const displayName = user.displayName || user.email;
 
-  // Replace with your real API keys:
-  const OPENAI_API_KEY = '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';
-  const USDA_API_KEY = 'IanzK0U4XKzv8hi50hZqD3gfkcBmodWurWh1gIsS';
+    // Replace with your real API keys:
+    const OPENAI_API_KEY = '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';
+    const USDA_API_KEY = 'IanzK0U4XKzv8hi50hZqD3gfkcBmodWurWh1gIsS';
 
   // ---------- STATE ----------
   const [ingredients, setIngredients] = useState('');
@@ -80,7 +81,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
 
   const [loading, setLoading] = useState(false);
   const [mealData, setMealData] = useState<Meal[] | null>(null);
-  const [workoutPlan, setWorkoutPlan] = useState<string | null>(null);
+  const [workoutPlan, setWorkoutPlan] = useState<string | Record<string, any> | null>(null);
 
   // ---------- For the Meal Details Modal ----------
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
@@ -178,21 +179,52 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
     try {
       // Build prompt
       const prompt = `
-        I have these ingredients: ${ingredients}.
-        I want to train these muscle groups: ${muscleGroups}.
-        I have ${timeSpent || '1 hour'} to spend at the gym.
-        1) Generate 4 meal suggestions (breakfast, lunch, dinner, snack) in valid JSON,
-           making sure each meal includes:
-              - A name
-              - A short set of instructions
-              - A list of ingredients (with item name and quantity)
-              - (Placeholder) macros for protein, carbs, fat, sugars
-        2) Generate a workout plan that fits the muscle groups and time constraints.
-        3) Return JSON strictly in the format:
-           {
-             "meals": [...],
-             "workout": "..."
-           }
+You are a helpful nutrition and fitness AI. The user has the following details:
+- Ingredients available (with total amounts): ${ingredients}
+- Please use ALL of these ingredient quantities across 4 meals (Breakfast, Lunch, Dinner, Snack).
+- Muscle groups to train: ${muscleGroups}
+- Time available for the gym: ${timeSpent || '1 hour'}
+
+if no input in ingredients don't generate anything for the meals part only!
+1) Generate 4 meal suggestions that:
+   - Use/distribute ALL the ingredients in their full quantity
+   - Keep total daily kcal ~1800-2000, with ~120g protein or more
+   - For each meal, provide:
+        "name"
+        "instructions"
+        "ingredients" (an array of {item, quantity})
+        "macros" ({protein, carbs, fat, sugars})
+
+2) Generate a workout plan that suits the muscle groups & time. 
+   Provide a structure, e.g.:
+   {
+     "warm-up": "...",
+     "main": "...",
+     "cooldown": "..."
+   }
+
+Return JSON ONLY in this format (no extra text):
+{
+  "meals": [
+    {
+      "name": "...",
+      "instructions": "...",
+      "ingredients": [...],
+      "macros": {
+        "protein": ...,
+        "carbs": ...,
+        "fat": ...,
+        "sugars": ...
+      }
+    },
+    ...
+  ],
+  "workout": {
+     "warm-up": "...",
+     "main": "...",
+     "cooldown": "..."
+  }
+}
       `;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -202,7 +234,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
           Authorization: `Bearer ${OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4',
           messages: [{ role: 'user', content: prompt }],
         }),
       });
@@ -228,6 +260,8 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
       }
 
       let finalMeals = parsed.meals;
+
+      // If user wants USDA-based macros, override the GPT placeholders
       if (useUSDA) {
         finalMeals = await overrideMealMacrosWithUSDA(parsed.meals);
       }
@@ -292,7 +326,12 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
               <IonButton expand="block" routerLink="/tab1" color="primary">
                 Diary Recordings
               </IonButton>
-              <IonButton expand="block" onClick={handleLogout} color="danger" className="logout-button">
+              <IonButton
+                expand="block"
+                onClick={handleLogout}
+                color="danger"
+                className="logout-button"
+              >
                 LOGOUT
               </IonButton>
             </IonCol>
@@ -305,7 +344,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
                 <IonLabel position="stacked">Ingredients (comma-separated)</IonLabel>
                 <IonInput
                   value={ingredients}
-                  placeholder="e.g. eggs, rice, beef, carrots"
+                  placeholder="e.g. 500g beef, 500g rice, 2 eggs"
                   onIonChange={(e) => setIngredients(e.detail.value!)}
                 />
               </IonItem>
@@ -452,24 +491,82 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
         </IonContent>
       </IonModal>
 
-      {/* ============ WORKOUT DETAILS MODAL ============ */}
-      <IonModal isOpen={showWorkoutModal} onDidDismiss={closeWorkoutModal}>
-        <IonHeader>
-          <IonToolbar color="primary">
-            <IonTitle>Workout Plan</IonTitle>
-            <IonButton slot="end" onClick={closeWorkoutModal}>
-              CLOSE
-            </IonButton>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {workoutPlan && (
-            <pre style={{ whiteSpace: 'pre-wrap' }}>
-              {workoutPlan}
-            </pre>
-          )}
-        </IonContent>
-      </IonModal>
+      
+  
+        {/* ============ WORKOUT DETAILS MODAL ============ */}
+<IonModal isOpen={showWorkoutModal} onDidDismiss={closeWorkoutModal}>
+  <IonHeader>
+    <IonToolbar color="primary">
+      <IonTitle>Workout Plan</IonTitle>
+      <IonButton slot="end" onClick={closeWorkoutModal}>
+        CLOSE
+      </IonButton>
+    </IonToolbar>
+  </IonHeader>
+
+  <IonContent className="ion-padding">
+    {workoutPlan && (
+      typeof workoutPlan === 'string'
+        ? (
+          // If GPT returns a string, we can simply display it as bullet points.
+          // One simplistic approach: split by newlines or periods and make <li> for each.
+          <div>
+            {workoutPlan
+              .split('.')
+              .map((sentence, idx) => {
+                const trimmed = sentence.trim();
+                if (!trimmed) return null;
+                return <li key={idx}>{trimmed}.</li>;
+              })
+            }
+          </div>
+        )
+        : (
+          // Otherwise, it's likely an object with { "warm-up", "main", "cooldown" }.
+          <div>
+            {/* Warm-up */}
+            <h3>Warm-up</h3>
+            <ul>
+              {workoutPlan["warm-up"]
+                .split('.')
+                .map((step: string, idx: number) => {
+                  const trimmed = step.trim();
+                  if (!trimmed) return null;
+                  return <li key={idx}>{trimmed}.</li>;
+                })
+              }
+            </ul>
+
+            {/* Main */}
+            <h3>Main</h3>
+            <ul>
+              {workoutPlan.main
+                .split('.')
+                .map((step: string, idx: number) => {
+                  const trimmed = step.trim();
+                  if (!trimmed) return null;
+                  return <li key={idx}>{trimmed}.</li>;
+                })
+              }
+            </ul>
+
+            {/* Cooldown */}
+            <h3>Cooldown</h3>
+            <ul>
+              {workoutPlan.cooldown
+                .split('.')
+                .map((step: string, idx: number) => {
+                  const trimmed = step.trim();
+                  if (!trimmed) return null;
+                  return <li key={idx}>{trimmed}.</li>;
+                })
+              }
+            </ul>
+          </div>
+        )
+    )}
+  </IonContent>
+</IonModal>
     </IonPage>
   );
 };
