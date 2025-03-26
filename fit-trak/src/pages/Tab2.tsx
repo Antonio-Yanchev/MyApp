@@ -23,6 +23,8 @@ import {
   IonModal,
   IonButtons,
   useIonAlert,
+  IonIcon,
+  IonListHeader,
 } from '@ionic/react';
 import { User } from 'firebase/auth';
 import { signOut } from 'firebase/auth';
@@ -40,7 +42,6 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 
-// Chart.js + react-chartjs-2
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -48,27 +49,25 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  Title,
+  Title as ChartTitle,
   Tooltip,
   Legend,
 } from 'chart.js';
 
 import { auth, db } from '../firebaseConfig';
 import './Tab2.css';
+import { pin, closeCircle } from 'ionicons/icons';
 
-// Register Chart.js components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, ChartTitle, Tooltip, Legend);
 
-// MET lookup table for calorie calculation
 const MET_VALUES: Record<string, number> = {
   running: 9.8,
   walking: 3.5,
   football: 7.0,
   swimming: 8.0,
-  // ... add more as needed
+  // add more if you like
 };
 
-// Chart configuration (dual y-axis)
 const chartOptions: ChartOptions<'bar'> = {
   responsive: true,
   layout: {
@@ -115,11 +114,17 @@ interface ExerciseEntry {
   id: string;
   userId: string;
   exerciseName: string;
-  duration: number; // in minutes
-  dateTime: string; // ISO date string
+  duration: number;
+  dateTime: string; // ISO date string (2025-03-26T15:14, etc.)
   notes?: string;
   createdAt?: any;
   caloriesBurned?: number;
+}
+
+interface PinnedExercise {
+  id: string;         // doc ID in Firestore pinnedExercises
+  exercise: ExerciseEntry;
+  pinnedAt?: any;     // serverTimestamp
 }
 
 type Tab2Props = {
@@ -127,37 +132,37 @@ type Tab2Props = {
 };
 
 const Tab2: React.FC<Tab2Props> = ({ user }) => {
-  // IonAlert for confirm dialogs
   const [presentAlert] = useIonAlert();
 
-  // ===== USER PROFILE (WEIGHT & HEIGHT) =====
+  // Profile
   const [userWeight, setUserWeight] = useState<number | null>(null);
-  const [userHeight, setUserHeight] = useState<number | null>(null); // OPTIONAL
+  const [userHeight, setUserHeight] = useState<number | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  // ===== EXERCISE FORM (CREATE) =====
+  // Exercise form
   const [exerciseName, setExerciseName] = useState('');
   const [duration, setDuration] = useState('');
   const [dateTime, setDateTime] = useState('');
   const [notes, setNotes] = useState('');
 
-  // ===== EXERCISE DATA LIST =====
+  // Exercises
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
 
-  // ===== CHART MODAL =====
+  // Chart
   const [showChartModal, setShowChartModal] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<ExerciseEntry | null>(null);
+  const [chartData, setChartData] = useState<any>(null);
 
-  // ===== EDIT MODAL =====
+  // Edit modal
   const [showEditModal, setShowEditModal] = useState(false);
   const [exerciseToEdit, setExerciseToEdit] = useState<ExerciseEntry | null>(null);
 
-  // For display
-  const displayName = user.displayName || user.email || 'Anonymous';
+  // Pinned
+  const [pinnedExercises, setPinnedExercises] = useState<PinnedExercise[]>([]);
 
-  // =====================
-  // 1) FETCH USER PROFILE
-  // =====================
+  const displayName = user.displayName || user.email || 'User';
+
+  // ===== 1) FETCH USER PROFILE =====
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -167,29 +172,22 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
         if (snapshot.exists()) {
           const data = snapshot.data();
           if (data && data.weight) setUserWeight(data.weight);
-          if (data && data.height) setUserHeight(data.height); // OPTIONAL
+          if (data && data.height) setUserHeight(data.height);
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
       }
     };
-    if (user.uid) {
-      fetchProfile();
-    }
+    fetchProfile();
   }, [user.uid]);
 
-  // =====================
-  // 2) SAVE USER PROFILE
-  // =====================
+  // ===== 2) SAVE USER PROFILE =====
   const handleSaveProfile = async () => {
     try {
       const userDocRef = doc(db, 'users', user.uid);
       await setDoc(
         userDocRef,
-        {
-          weight: userWeight,
-          height: userHeight, // OPTIONAL
-        },
+        { weight: userWeight, height: userHeight },
         { merge: true }
       );
       alert('Profile saved successfully!');
@@ -200,9 +198,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
     }
   };
 
-  // =======================
-  // 3) FETCH EXERCISES LIST
-  // =======================
+  // ===== 3) FETCH EXERCISES =====
   const fetchExercises = async () => {
     try {
       const exercisesRef = collection(db, 'users', user.uid, 'exercises');
@@ -222,15 +218,11 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
     }
   };
 
-  // Load exercises on mount
   useEffect(() => {
     fetchExercises();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.uid]);
 
-  // =========================
-  // 4) CREATE NEW EXERCISE
-  // =========================
+  // ===== 4) CREATE NEW EXERCISE =====
   const handleSaveExercise = async () => {
     if (!userWeight) {
       alert('Please set your weight in the Profile first!');
@@ -270,22 +262,17 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
     }
   };
 
-  // =========================
-  // 5) LOGOUT
-  // =========================
+  // ===== 5) LOGOUT =====
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      console.log('User signed out');
     } catch (error) {
       console.error('Logout error:', error);
       alert('Error logging out. Check console for details.');
     }
   };
 
-  // =========================
-  // 6) DELETE EXERCISE
-  // =========================
+  // ===== 6) DELETE EXERCISE =====
   const handleDeleteExercise = async (exerciseId: string) => {
     presentAlert({
       header: 'Confirm Delete',
@@ -309,9 +296,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
     });
   };
 
-  // =========================
-  // 7) EDIT EXERCISE
-  // =========================
+  // ===== 7) EDIT EXERCISE =====
   const openEditModal = (exercise: ExerciseEntry) => {
     setExerciseToEdit(exercise);
     setShowEditModal(true);
@@ -319,7 +304,6 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
 
   const handleEditSave = async () => {
     if (!exerciseToEdit) return;
-
     if (
       !exerciseToEdit.exerciseName.trim() ||
       !exerciseToEdit.duration ||
@@ -353,23 +337,16 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
     }
   };
 
-  // =========================
-  // 8) VIEW CHART
-  // =========================
-  const openExerciseModal = (exercise: ExerciseEntry) => {
+  // ===== 8) OPEN CHART MODAL =====
+  const openChartModal = (exercise: ExerciseEntry) => {
     setSelectedExercise(exercise);
-    setShowChartModal(true);
-  };
 
-  // Build the chart data for the selected exercise
-  let chartData: any = null;
-  if (selectedExercise) {
-    chartData = {
-      labels: [selectedExercise.exerciseName],
+    const data = {
+      labels: [exercise.exerciseName],
       datasets: [
         {
           label: 'Duration (min)',
-          data: [selectedExercise.duration],
+          data: [exercise.duration],
           backgroundColor: '#3b83bd',
           yAxisID: 'yMinutes',
           barPercentage: 0.5,
@@ -377,7 +354,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
         },
         {
           label: 'Calories Burned',
-          data: [selectedExercise.caloriesBurned ?? 0],
+          data: [exercise.caloriesBurned ?? 0],
           backgroundColor: '#e74c3c',
           yAxisID: 'yCalories',
           barPercentage: 0.5,
@@ -385,9 +362,62 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
         },
       ],
     };
-  }
+    setChartData(data);
 
-  // Group exercises by date
+    setShowChartModal(true);
+  };
+
+  // ===== PINNED EXERCISES (store in subcollection) =====
+  const fetchPinnedExercises = async () => {
+    try {
+      const pinnedRef = collection(db, 'users', user.uid, 'pinnedExercises');
+      const qsnap = await getDocs(pinnedRef);
+      const pinned: PinnedExercise[] = [];
+      qsnap.forEach((docSnap) => {
+        pinned.push({
+          id: docSnap.id,
+          ...(docSnap.data() as Omit<PinnedExercise, 'id'>),
+        });
+      });
+      setPinnedExercises(pinned);
+    } catch (error) {
+      console.error('Error fetching pinned exercises:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPinnedExercises();
+  }, [user.uid]);
+
+  const handlePinExercise = async (entry: ExerciseEntry) => {
+    try {
+      const pinnedRef = collection(db, 'users', user.uid, 'pinnedExercises');
+      const docRef = await addDoc(pinnedRef, {
+        exercise: entry,          // store a copy of the exercise data
+        pinnedAt: serverTimestamp(),
+      });
+      setPinnedExercises((prev) => [
+        ...prev,
+        { id: docRef.id, exercise: entry, pinnedAt: new Date() },
+      ]);
+      alert('Exercise pinned!');
+    } catch (error) {
+      console.error('Error pinning exercise:', error);
+      alert('Error pinning exercise. Check console for details.');
+    }
+  };
+
+  const handleUnpinExercise = async (pinnedId: string) => {
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'pinnedExercises', pinnedId));
+      setPinnedExercises((prev) => prev.filter((x) => x.id !== pinnedId));
+    } catch (error) {
+      console.error('Error unpinning exercise:', error);
+      alert('Error unpinning exercise. Check console for details.');
+    }
+  };
+
+  // Group main exercises by date
   const groupedExercises: Record<string, ExerciseEntry[]> = {};
   exercises.forEach((entry) => {
     const datePart = entry.dateTime.split('T')[0];
@@ -398,44 +428,70 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
   });
 
   return (
-    // NOTE: We add the className here:
     <IonPage className="tab2-page">
-      <div className="tab2-app-container">
-        {/* Sidebar */}
-        <div className="tab2-sidebar">
-          <h2 className="tab2-app-title">Dashboard</h2>
-          <IonButton expand="block" routerLink="/tab1">
-            Dairy recording
-          </IonButton>
-          <IonButton expand="block" routerLink="/tab3">
-            Generate Meal Plan
-          </IonButton>
-          <IonButton expand="block" color="danger" onClick={handleLogout}>
-            Logout
-          </IonButton>
-        </div>
+      {/* HEADER */}
+      <IonHeader>
+        <IonToolbar color="primary">
+          <IonTitle>Record Exercise</IonTitle>
+        </IonToolbar>
+      </IonHeader>
 
-        {/* Main Content */}
-        <div className="tab2-main-content">
-          <IonHeader>
-            <IonToolbar>
-              <IonTitle>Record Exercise</IonTitle>
-            </IonToolbar>
-          </IonHeader>
+      {/* CONTENT LAYOUT */}
+      <IonContent scrollY={false}>
+        <div className="tab2-layout">
+          {/* SIDEBAR */}
+          <div className="tab2-sidebar">
+            <h2 className="tab2-app-title">Dashboard</h2>
+            <p className="hello-user-text">Hello, {displayName}!</p>
 
-          <IonContent className="ion-padding">
-            <h1>Welcome, {displayName}!</h1>
-            <h2>Record Your Exercise</h2>
-
-            {/* Moved the Profile button here */}
-            <IonButton
-              style={{ marginBottom: '1rem' }}
-              expand="block"
-              onClick={() => setShowProfileModal(true)}
-            >
+            <IonButton expand="block" onClick={() => setShowProfileModal(true)}>
               Profile
             </IonButton>
+            <IonButton expand="block" routerLink="/tab1">
+              Diary Recording
+            </IonButton>
+            <IonButton expand="block" routerLink="/tab3">
+              Generate Meal Plan
+            </IonButton>
 
+            {/* PINNED EXERCISES */}
+            <IonListHeader>Pinned Exercises</IonListHeader>
+            <IonList>
+              {pinnedExercises.map((p) => (
+                <IonItem
+                  key={p.id}
+                  button
+                  onClick={() => openChartModal(p.exercise)} // view pinned details
+                >
+                  <IonIcon slot="start" icon={pin} />
+                  <IonLabel>{p.exercise.exerciseName}</IonLabel>
+                  <IonButton
+                    fill="clear"
+                    color="danger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUnpinExercise(p.id);
+                    }}
+                  >
+                    <IonIcon icon={closeCircle} slot="icon-only" />
+                  </IonButton>
+                </IonItem>
+              ))}
+            </IonList>
+
+            <IonButton
+              expand="block"
+              color="danger"
+              onClick={handleLogout}
+              className="logout-button"
+            >
+              Logout
+            </IonButton>
+          </div>
+
+          {/* MAIN CONTENT */}
+          <div className="tab2-main-content">
+            <h2>Record Your Exercise</h2>
             <IonList>
               <IonItem>
                 <IonLabel position="stacked">Exercise Name</IonLabel>
@@ -481,7 +537,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
             </IonList>
 
             <IonButton expand="block" color="success" onClick={handleSaveExercise}>
-              Save Exercise
+              SAVE EXERCISE
             </IonButton>
 
             <h2 style={{ marginTop: '2rem' }}>Your Exercises</h2>
@@ -496,7 +552,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                 Object.keys(groupedExercises).map((date) => (
                   <IonRow key={date}>
                     <IonCol size="12">
-                      <IonCard>
+                      <IonCard className="exercise-card">
                         <IonCardHeader>
                           <IonCardTitle>{date}</IonCardTitle>
                         </IonCardHeader>
@@ -510,7 +566,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                                 paddingBottom: '0.5rem',
                                 cursor: 'pointer',
                               }}
-                              onClick={() => openExerciseModal(entry)}
+                              onClick={() => openChartModal(entry)}
                             >
                               <strong>{entry.exerciseName}</strong> <br />
                               Duration: {entry.duration} min
@@ -522,7 +578,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                               )}
                               {entry.notes && <p>Notes: {entry.notes}</p>}
 
-                              {/* Buttons must stop the parent's onClick */}
+                              {/* EDIT, DELETE, PIN Buttons */}
                               <IonButtons onClick={(e) => e.stopPropagation()}>
                                 <IonButton
                                   className="edit-button"
@@ -536,6 +592,12 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                                 >
                                   DELETE
                                 </IonButton>
+                                <IonButton
+                                  fill="outline"
+                                  onClick={() => handlePinExercise(entry)}
+                                >
+                                  PIN
+                                </IonButton>
                               </IonButtons>
                             </div>
                           ))}
@@ -546,21 +608,19 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                 ))
               )}
             </IonGrid>
-          </IonContent>
-
-          <IonFooter>
-            <IonToolbar>
-              <IonTitle>© 2025 FIT-TRAK</IonTitle>
-            </IonToolbar>
-          </IonFooter>
+          </div>
         </div>
-      </div>
+      </IonContent>
 
-      {/* ========== PROFILE MODAL ========== */}
-      <IonModal
-        isOpen={showProfileModal}
-        onDidDismiss={() => setShowProfileModal(false)}
-      >
+      {/* FOOTER */}
+      <IonFooter>
+        <IonToolbar color="primary">
+          <IonTitle>© 2025 FIT-TRAK</IonTitle>
+        </IonToolbar>
+      </IonFooter>
+
+      {/* PROFILE MODAL */}
+      <IonModal isOpen={showProfileModal} onDidDismiss={() => setShowProfileModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>Edit Profile</IonTitle>
@@ -579,8 +639,6 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
               }}
             />
           </IonItem>
-
-          {/* OPTIONAL: Capture user height if desired */}
           <IonItem>
             <IonLabel position="stacked">Height (cm)</IonLabel>
             <IonInput
@@ -593,7 +651,6 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
               }}
             />
           </IonItem>
-
           <IonButton expand="block" color="success" onClick={handleSaveProfile}>
             Save
           </IonButton>
@@ -607,14 +664,22 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
         </IonFooter>
       </IonModal>
 
-      {/* ========== CHART MODAL ========== */}
+      {/* CHART MODAL */}
       <IonModal
         isOpen={showChartModal}
         onDidDismiss={() => setShowChartModal(false)}
       >
         <IonHeader>
           <IonToolbar>
-            <IonTitle>{selectedExercise?.exerciseName} - Details</IonTitle>
+            {/* 
+              KEY CHANGE: we show exercise date (e.g., 2025-03-26) in the title. 
+              .split('T')[0] just grabs YYYY-MM-DD from an ISO string. 
+            */}
+            <IonTitle>
+              {selectedExercise
+                ? `${selectedExercise.exerciseName} (${selectedExercise.dateTime.split('T')[0]}) Details`
+                : 'Details'}
+            </IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
@@ -633,7 +698,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
         </IonFooter>
       </IonModal>
 
-      {/* ========== EDIT MODAL ========== */}
+      {/* EDIT MODAL */}
       <IonModal
         isOpen={showEditModal}
         onDidDismiss={() => {
@@ -661,7 +726,6 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                   }
                 />
               </IonItem>
-
               <IonItem>
                 <IonLabel position="stacked">Duration (minutes)</IonLabel>
                 <IonInput
@@ -675,7 +739,6 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                   }
                 />
               </IonItem>
-
               <IonItem>
                 <IonLabel position="stacked">Date & Time</IonLabel>
                 <IonDatetime
@@ -692,7 +755,6 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                   }}
                 />
               </IonItem>
-
               <IonItem>
                 <IonLabel position="stacked">Notes</IonLabel>
                 <IonTextarea
@@ -702,7 +764,6 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                   }
                 />
               </IonItem>
-
               <IonButton expand="block" color="success" onClick={handleEditSave}>
                 Save Changes
               </IonButton>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IonPage,
   IonHeader,
@@ -17,13 +17,25 @@ import {
   IonSpinner,
   IonList,
   IonModal,
+  IonListHeader,
+  IonItemDivider,
+  IonIcon,
+  IonLabel as IonItemLabel,
 } from '@ionic/react';
 import { User } from 'firebase/auth';
 import { signOut } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
+import {
+  doc,
+  collection,
+  addDoc,
+  getDocs,
+  serverTimestamp,
+  deleteDoc,
+} from 'firebase/firestore';
+
 import './Tab3.css';
 
-// For chart
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -32,12 +44,15 @@ import {
   Legend
 } from 'chart.js';
 
+// IonIcons
+import { star } from 'ionicons/icons';
+
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 // -------------- TYPES --------------
 type Ingredient = {
   item: string;
-  quantity: string; 
+  quantity: string;
 };
 
 type Meal = {
@@ -57,14 +72,22 @@ type ChatGPTResult = {
   workout: string | Record<string, any>;
 };
 
+interface Favorite {
+  id: string; // Firestore doc ID
+  type: 'meal' | 'workout';
+  createdAt?: any; // serverTimestamp
+  meal?: Meal; // if type=meal
+  workout?: string | Record<string, any>; // if type=workout
+}
+
 type Tab3Props = {
   user: User;
 };
 
 const Tab3: React.FC<Tab3Props> = ({ user }) => {
-  const displayName = user.displayName || user.email;
+  const displayName = user.displayName || user.email || 'User';
 
-  // Vite environment variables
+  // Vite env variables
   const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY ?? '';
   const USDA_API_KEY = import.meta.env.VITE_USDA_API_KEY ?? '';
 
@@ -78,12 +101,16 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
   const [mealData, setMealData] = useState<Meal[] | null>(null);
   const [workoutPlan, setWorkoutPlan] = useState<string | Record<string, any> | null>(null);
 
-  // ---------- Meal Modal ----------
+  // ---------- Meal Details Modal ----------
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [showMealModal, setShowMealModal] = useState(false);
 
   // ---------- Workout Plan Modal ----------
   const [showWorkoutModal, setShowWorkoutModal] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState<string | Record<string, any> | null>(null);
+
+  // ---------- Favorites ----------
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
 
   // -------------- Logout --------------
   const handleLogout = async () => {
@@ -257,7 +284,7 @@ Return JSON ONLY in this format (no extra text):
       }
 
       let finalMeals = parsed.meals;
-      // If user wants USDA-based macros, override the GPT placeholders
+      // If user wants USDA-based macros, override
       if (useUSDA) {
         finalMeals = await overrideMealMacrosWithUSDA(parsed.meals);
       }
@@ -292,14 +319,105 @@ Return JSON ONLY in this format (no extra text):
   };
 
   // -------------- Workout Modal --------------
-  const openWorkoutModal = () => {
+  const openWorkoutModal = (plan: string | Record<string, any>) => {
+    setSelectedWorkout(plan);
     setShowWorkoutModal(true);
   };
   const closeWorkoutModal = () => {
+    setSelectedWorkout(null);
     setShowWorkoutModal(false);
   };
 
-  // -------------- RENDER --------------
+  // ============= FAVORITES =============
+  // 1) Fetch favorites on mount
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const favoritesRef = collection(db, 'users', user.uid, 'favorites');
+        const snapshot = await getDocs(favoritesRef);
+        const favs: Favorite[] = [];
+        snapshot.forEach((docSnap) => {
+          favs.push({
+            id: docSnap.id,
+            ...(docSnap.data() as Omit<Favorite, 'id'>),
+          });
+        });
+        setFavorites(favs);
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+      }
+    };
+    fetchFavorites();
+  }, [user.uid]);
+
+  // 2) Add a meal to favorites
+  const handleAddMealToFavorites = async (meal: Meal) => {
+    try {
+      const favoritesRef = collection(db, 'users', user.uid, 'favorites');
+      const docRef = await addDoc(favoritesRef, {
+        type: 'meal',
+        meal,
+        createdAt: serverTimestamp(),
+      });
+      setFavorites((prev) => [
+        ...prev,
+        { id: docRef.id, type: 'meal', meal, createdAt: new Date() },
+      ]);
+      alert(`Meal "${meal.name}" added to favorites!`);
+    } catch (error) {
+      console.error('Error adding meal to favorites:', error);
+      alert('Could not add meal to favorites: Missing or insufficient Firestore permissions?');
+    }
+  };
+
+  // 3) Add the workout plan to favorites
+  const handleAddWorkoutToFavorites = async () => {
+    if (!workoutPlan) {
+      return alert('No workout plan available.');
+    }
+    try {
+      const favoritesRef = collection(db, 'users', user.uid, 'favorites');
+      const docRef = await addDoc(favoritesRef, {
+        type: 'workout',
+        workout: workoutPlan,
+        createdAt: serverTimestamp(),
+      });
+      setFavorites((prev) => [
+        ...prev,
+        { id: docRef.id, type: 'workout', workout: workoutPlan, createdAt: new Date() },
+      ]);
+      alert('Workout plan added to favorites!');
+    } catch (error) {
+      console.error('Error adding workout to favorites:', error);
+      alert('Could not add workout to favorites: Missing or insufficient Firestore permissions?');
+    }
+  };
+
+  // 4) Separate meal vs. workout favorites
+  const mealFaves = favorites.filter((f) => f.type === 'meal' && f.meal);
+  const workoutFaves = favorites.filter((f) => f.type === 'workout' && f.workout);
+
+  // 5) Clicking on a favorite meal -> open that meal details
+  //    Clicking on a favorite workout -> open that workout plan
+  const handleFavoriteClick = (fav: Favorite) => {
+    if (fav.type === 'meal' && fav.meal) {
+      openMealModal(fav.meal);
+    } else if (fav.type === 'workout' && fav.workout) {
+      openWorkoutModal(fav.workout);
+    }
+  };
+
+  // 6) Remove a favorite
+  const handleRemoveFavorite = async (fav: Favorite) => {
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'favorites', fav.id));
+      setFavorites((prev) => prev.filter((x) => x.id !== fav.id));
+    } catch (error) {
+      console.error('Error removing favorite:', error);
+      alert('Could not remove favorite. Check console for details.');
+    }
+  };
+
   return (
     <IonPage className="tab3-page">
       {/* HEADER */}
@@ -315,12 +433,63 @@ Return JSON ONLY in this format (no extra text):
           {/* SIDEBAR */}
           <div className="sidebar">
             <h2 className="app-title">Dashboard</h2>
+            {/* Hello username */}
+            <p className="hello-user-text">Hello, {displayName}!</p>
+
             <IonButton expand="block" routerLink="/tab2" color="primary">
               RECORD EXERCISES
             </IonButton>
             <IonButton expand="block" routerLink="/tab1" color="primary">
               Diary Recordings
             </IonButton>
+
+            {/* Favorites - with two sub-headings */}
+            <IonListHeader>Meal Favourites</IonListHeader>
+            <IonList>
+              {mealFaves.map((fav) => (
+                <IonItem
+                  key={fav.id}
+                  button
+                  onClick={() => handleFavoriteClick(fav)}
+                >
+                  <IonIcon icon={star} slot="start" />
+                  <IonLabel>{fav.meal?.name}</IonLabel>
+                  <IonButton
+                    color="danger"
+                    onClick={(e) => {
+                      e.stopPropagation(); 
+                      handleRemoveFavorite(fav);
+                    }}
+                  >
+                    Remove
+                  </IonButton>
+                </IonItem>
+              ))}
+            </IonList>
+
+            <IonListHeader>Workout Favourites</IonListHeader>
+            <IonList>
+              {workoutFaves.map((fav) => (
+                <IonItem
+                  key={fav.id}
+                  button
+                  onClick={() => handleFavoriteClick(fav)}
+                >
+                  <IonIcon icon={star} slot="start" />
+                  <IonLabel>Workout Plan</IonLabel>
+                  <IonButton
+                    color="danger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveFavorite(fav);
+                    }}
+                  >
+                    Remove
+                  </IonButton>
+                </IonItem>
+              ))}
+            </IonList>
+
             <IonButton
               expand="block"
               onClick={handleLogout}
@@ -333,8 +502,6 @@ Return JSON ONLY in this format (no extra text):
 
           {/* MAIN CONTENT */}
           <div className="main-content">
-            <h2>Welcome, {displayName}!</h2>
-
             <IonItem>
               <IonLabel position="stacked">Ingredients (comma-separated)</IonLabel>
               <IonInput
@@ -405,6 +572,17 @@ Return JSON ONLY in this format (no extra text):
                       >
                         VIEW DETAILS
                       </IonButton>
+                      {/* Add to favorites */}
+                      <IonButton
+                        color="secondary"
+                        style={{ marginLeft: '0.5rem' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddMealToFavorites(meal);
+                        }}
+                      >
+                        FAVOURITE
+                      </IonButton>
                     </IonCardContent>
                   </IonCard>
                 ))}
@@ -418,8 +596,18 @@ Return JSON ONLY in this format (no extra text):
                   <IonCardTitle>Workout Plan</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonButton onClick={openWorkoutModal} color="secondary">
-                    View Full Workout
+                  <IonButton onClick={() => openWorkoutModal(workoutPlan)} color="secondary">
+                    VIEW FULL WORKOUT
+                  </IonButton>
+                  {/* Add to favorites */}
+                  <IonButton
+                    color="tertiary"
+                    style={{ marginLeft: '0.5rem' }}
+                    onClick={async () => {
+                      await handleAddWorkoutToFavorites();
+                    }}
+                  >
+                    FAVOURITE
                   </IonButton>
                 </IonCardContent>
               </IonCard>
@@ -497,12 +685,11 @@ Return JSON ONLY in this format (no extra text):
         </IonHeader>
 
         <IonContent className="ion-padding">
-          {workoutPlan && (
-            typeof workoutPlan === 'string'
+          {selectedWorkout && (
+            typeof selectedWorkout === 'string'
               ? (
-                // If GPT returns a string, display it as bullet points
                 <div>
-                  {workoutPlan
+                  {selectedWorkout
                     .split('.')
                     .map((sentence, idx) => {
                       const trimmed = sentence.trim();
@@ -513,12 +700,10 @@ Return JSON ONLY in this format (no extra text):
                 </div>
               )
               : (
-                // Otherwise, it's likely an object with { warm-up, main, cooldown }
                 <div>
-                  {/* Warm-up */}
                   <h3>Warm-up</h3>
                   <ul>
-                    {workoutPlan["warm-up"]
+                    {selectedWorkout["warm-up"]
                       .split('.')
                       .map((step: string, idx: number) => {
                         const trimmed = step.trim();
@@ -527,11 +712,9 @@ Return JSON ONLY in this format (no extra text):
                       })
                     }
                   </ul>
-
-                  {/* Main */}
                   <h3>Main</h3>
                   <ul>
-                    {workoutPlan.main
+                    {selectedWorkout.main
                       .split('.')
                       .map((step: string, idx: number) => {
                         const trimmed = step.trim();
@@ -540,11 +723,9 @@ Return JSON ONLY in this format (no extra text):
                       })
                     }
                   </ul>
-
-                  {/* Cooldown */}
                   <h3>Cooldown</h3>
                   <ul>
-                    {workoutPlan.cooldown
+                    {selectedWorkout.cooldown
                       .split('.')
                       .map((step: string, idx: number) => {
                         const trimmed = step.trim();

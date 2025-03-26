@@ -1,11 +1,4 @@
-/* ============= Tab3 Page Scoping ============= */
-.tab3-page {
-  /* You can define Ion color variables if you want them just on Tab3
-     e.g.:
-     --ion-color-primary: #3880ff;
-     etc.
-  */
-}
+/* Tab3.css */
 
 /* Container for the sidebar & main content side by side */
 .tab3-page .app-container {

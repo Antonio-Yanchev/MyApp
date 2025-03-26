@@ -20,12 +20,26 @@ import {
   IonCol,
   IonItem,
   IonLabel,
+  IonButtons,
 } from '@ionic/react';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebaseConfig';
-import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  doc,
+  deleteDoc,
+} from 'firebase/firestore';
 import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from 'chart.js';
 import { User } from 'firebase/auth';
 import './Tab1.css';
 
@@ -54,6 +68,9 @@ type Tab1Props = {
 };
 
 const Tab1: React.FC<Tab1Props> = ({ user }) => {
+  // Use displayName or fallback to email
+  const displayName = user.displayName || user.email || 'User';
+
   const [queryText, setQueryText] = useState('');
   const [results, setResults] = useState<USDAFoodProduct[]>([]);
   const [loading, setLoading] = useState(false);
@@ -74,11 +91,12 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
     }
   };
 
-  // USDA API Search
+  // USDA API Food Search
   const handleSearch = async () => {
     if (!queryText) return;
     try {
       setLoading(true);
+
       const apiKey = import.meta.env.VITE_USDA_API_KEY ?? '';
       const baseUrl = 'https://api.nal.usda.gov/fdc/v1/foods/search';
 
@@ -151,8 +169,8 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
         const q = query(diaryRef, orderBy('date', 'desc'));
         const querySnapshot = await getDocs(q);
         const entries: DiaryEntry[] = [];
-        querySnapshot.forEach((doc) => {
-          entries.push(doc.data() as DiaryEntry);
+        querySnapshot.forEach((docSnap) => {
+          entries.push(docSnap.data() as DiaryEntry);
         });
         setDiaryEntries(entries);
       } catch (error) {
@@ -171,7 +189,39 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
     groupedEntries[entry.date].push(entry);
   });
 
-  // When a date card is clicked, gather total macros & show modal with chart
+  // Single-entry deletion
+  const handleDeleteDiaryEntry = async (entryId: string) => {
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'diaryEntries', entryId));
+      setDiaryEntries((prev) => prev.filter((entry) => entry.id !== entryId));
+      alert('Entry deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting diary entry:', error);
+      alert('Error deleting entry. See console for details.');
+    }
+  };
+
+  // Whole-day deletion
+  const handleDeleteDay = async (date: string) => {
+    try {
+      // Filter all diary entries for that date
+      const dayEntries = diaryEntries.filter((entry) => entry.date === date);
+
+      // Delete them all
+      for (const e of dayEntries) {
+        await deleteDoc(doc(db, 'users', user.uid, 'diaryEntries', e.id));
+      }
+
+      // Remove them from state
+      setDiaryEntries((prev) => prev.filter((entry) => entry.date !== date));
+      alert('All entries for this day have been deleted!');
+    } catch (error) {
+      console.error('Error deleting day entries:', error);
+      alert('Error deleting day. Check console for details.');
+    }
+  };
+
+  // Show modal with chart data for a clicked day
   const handleDayCardClick = (date: string) => {
     setSelectedDate(date);
     const entries = groupedEntries[date] || [];
@@ -204,7 +254,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
 
   return (
     <IonPage className="tab1-page">
-      {/* Header (Blue) */}
+      {/* HEADER */}
       <IonHeader>
         <IonToolbar color="primary">
           <IonTitle>
@@ -213,12 +263,15 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
         </IonToolbar>
       </IonHeader>
 
-      {/* IonContent with a full-height layout (sidebar + main) */}
+      {/* CONTENT */}
       <IonContent className="no-scroll">
         <div className="app-container">
-          {/* ========== Sidebar ========== */}
+          {/* SIDEBAR */}
           <div className="sidebar">
             <h2 className="app-title">Dashboard</h2>
+            {/* The new "Hello, {displayName}" text below */}
+            <p className="hello-user-text">Hello, {displayName}!</p>
+
             <IonButton expand="block" routerLink="/tab2">
               Record Exercises
             </IonButton>
@@ -228,12 +281,12 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
             </IonButton>
           </div>
 
-          {/* ========== Main Content ========== */}
+          {/* MAIN CONTENT */}
           <div className="main-content">
             <IonGrid>
-              {/* ========== Search bar row ========== */}
+              {/* Search Bar */}
               <IonRow className="ion-justify-content-center">
-                <IonCol size="12" sizeMd="12">
+                <IonCol size="12">
                   <IonSearchbar
                     placeholder="Search foods..."
                     showClearButton="always"
@@ -252,28 +305,28 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
                 </IonCol>
               </IonRow>
 
-              {/* ========== Search button row ========== */}
+              {/* Search Button */}
               <IonRow className="ion-justify-content-center">
-                <IonCol size="12" sizeMd="12">
+                <IonCol size="12">
                   <IonButton onClick={handleSearch} expand="block">
                     Search
                   </IonButton>
                 </IonCol>
               </IonRow>
 
-              {/* ========== Loading Spinner ========== */}
+              {/* Loading Spinner */}
               {loading && (
                 <IonRow className="spinner-row ion-justify-content-center">
-                  <IonCol size="12" sizeMd="12">
+                  <IonCol size="12">
                     <IonSpinner name="dots" />
                   </IonCol>
                 </IonRow>
               )}
 
-              {/* ========== Display search results or diary overview ========== */}
+              {/* Results OR Diary Entries */}
               {queryText ? (
                 <IonRow className="ion-justify-content-center">
-                  <IonCol size="12" sizeMd="12">
+                  <IonCol size="12">
                     <IonList>
                       {results.map((product, index) => (
                         <IonCard key={index} className="card-item">
@@ -288,7 +341,11 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
                               Fat: {product.nutriments?.fat ?? 'N/A'}g |{' '}
                               Sugars: {product.nutriments?.sugars ?? 'N/A'}g
                             </p>
-                            <IonButton onClick={() => handleAddToDiary(product)} color="secondary" size="small">
+                            <IonButton
+                              onClick={() => handleAddToDiary(product)}
+                              color="secondary"
+                              size="small"
+                            >
                               Add to Diary
                             </IonButton>
                           </IonCardContent>
@@ -300,14 +357,14 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
               ) : (
                 <>
                   <IonRow className="ion-justify-content-center">
-                    <IonCol size="12" sizeMd="12">
+                    <IonCol size="12">
                       <h1 className="diary-title">Your Exercise Overview:</h1>
                     </IonCol>
                   </IonRow>
 
                   {Object.keys(groupedEntries).length === 0 ? (
                     <IonRow className="ion-justify-content-center">
-                      <IonCol size="12" sizeMd="12">
+                      <IonCol size="12">
                         <p>No diary entries yet. Add some food items!</p>
                       </IonCol>
                     </IonRow>
@@ -328,7 +385,7 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
 
                       return (
                         <IonRow key={date} className="ion-justify-content-center">
-                          <IonCol size="12" sizeMd="12">
+                          <IonCol size="12">
                             <IonCard
                               className="card-item"
                               onClick={() => handleDayCardClick(date)}
@@ -342,7 +399,48 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
                                 <p>Carbs: {totalCarbs}g</p>
                                 <p>Fat: {totalFat}g</p>
                                 <p>Sugars: {totalSugars}g</p>
-                                <IonButton expand="block">View Details</IonButton>
+
+                                {/* Each item in this date */}
+                                {entries.map((entry) => (
+                                  <div
+                                    key={entry.id}
+                                    style={{
+                                      marginBottom: '1rem',
+                                      borderBottom: '1px solid #ccc',
+                                      paddingBottom: '0.5rem',
+                                    }}
+                                  >
+                                    <p className="food-item-text">
+                                      <strong>{entry.food.product_name}</strong> <br />
+                                      Carbs: {entry.food.nutriments?.carbohydrates ?? 'N/A'}g |{' '}
+                                      Protein: {entry.food.nutriments?.protein ?? 'N/A'}g |{' '}
+                                      Fat: {entry.food.nutriments?.fat ?? 'N/A'}g |{' '}
+                                      Sugars: {entry.food.nutriments?.sugars ?? 'N/A'}g
+                                    </p>
+                                    <IonButtons>
+                                      <IonButton
+                                        className="delete-button"
+                                        onClick={(e) => {
+                                          e.stopPropagation(); // prevent day-card click
+                                          handleDeleteDiaryEntry(entry.id);
+                                        }}
+                                      >
+                                        DELETE
+                                      </IonButton>
+                                    </IonButtons>
+                                  </div>
+                                ))}
+
+                                {/* Button to delete the entire day */}
+                                <IonButton
+                                  className="delete-button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteDay(date);
+                                  }}
+                                >
+                                  DELETE DAY
+                                </IonButton>
                               </IonCardContent>
                             </IonCard>
                           </IonCol>
@@ -357,14 +455,14 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
         </div>
       </IonContent>
 
-      {/* ========== Blue Footer ========== */}
+      {/* FOOTER */}
       <IonFooter>
         <IonToolbar color="primary">
           <IonTitle className="footer-title">© 2025 FIT-TRAK</IonTitle>
         </IonToolbar>
       </IonFooter>
 
-      {/* ========== Modal for Day Details ========== */}
+      {/* MODAL for Day Details (Chart) */}
       <IonModal isOpen={modalOpen} onDidDismiss={() => setModalOpen(false)}>
         <IonHeader>
           <IonToolbar color="primary">
