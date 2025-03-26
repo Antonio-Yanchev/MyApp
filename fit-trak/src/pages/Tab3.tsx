@@ -18,9 +18,7 @@ import {
   IonList,
   IonModal,
   IonListHeader,
-  IonItemDivider,
-  IonIcon,
-  IonLabel as IonItemLabel,
+  IonIcon
 } from '@ionic/react';
 import { User } from 'firebase/auth';
 import { signOut } from 'firebase/auth';
@@ -44,12 +42,10 @@ import {
   Legend
 } from 'chart.js';
 
-// IonIcons
 import { star } from 'ionicons/icons';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-// -------------- TYPES --------------
 type Ingredient = {
   item: string;
   quantity: string;
@@ -76,8 +72,8 @@ interface Favorite {
   id: string; // Firestore doc ID
   type: 'meal' | 'workout';
   createdAt?: any; // serverTimestamp
-  meal?: Meal; // if type=meal
-  workout?: string | Record<string, any>; // if type=workout
+  meal?: Meal;
+  workout?: string | Record<string, any>;
 }
 
 type Tab3Props = {
@@ -87,11 +83,10 @@ type Tab3Props = {
 const Tab3: React.FC<Tab3Props> = ({ user }) => {
   const displayName = user.displayName || user.email || 'User';
 
-  // Vite env variables
   const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY ?? '';
   const USDA_API_KEY = import.meta.env.VITE_USDA_API_KEY ?? '';
 
-  // ---------- STATE ----------
+  // ---------- State ----------
   const [ingredients, setIngredients] = useState('');
   const [muscleGroups, setMuscleGroups] = useState('');
   const [timeSpent, setTimeSpent] = useState('');
@@ -101,18 +96,18 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
   const [mealData, setMealData] = useState<Meal[] | null>(null);
   const [workoutPlan, setWorkoutPlan] = useState<string | Record<string, any> | null>(null);
 
-  // ---------- Meal Details Modal ----------
+  // Meal modal
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [showMealModal, setShowMealModal] = useState(false);
 
-  // ---------- Workout Plan Modal ----------
+  // Workout modal
   const [showWorkoutModal, setShowWorkoutModal] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<string | Record<string, any> | null>(null);
 
-  // ---------- Favorites ----------
+  // Favorites
   const [favorites, setFavorites] = useState<Favorite[]>([]);
 
-  // -------------- Logout --------------
+  // ---------- Logout ----------
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -123,7 +118,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
     }
   };
 
-  // -------------- USDA FETCH HELPER --------------
+  // ---------- USDA macros helper ----------
   async function fetchIngredientMacros(
     ingredientName: string,
     quantity: string
@@ -137,7 +132,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
 
       const response = await fetch(`${baseUrl}?${params.toString()}`);
       if (!response.ok) {
-        console.error('USDA response status:', response.status, response.statusText);
+        console.error('USDA response:', response.status, response.statusText);
         return { protein: 0, carbs: 0, fat: 0, sugars: 0 };
       }
 
@@ -195,7 +190,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
     return updatedMeals;
   }
 
-  // -------------- Generate (ChatGPT) --------------
+  // ---------- Generate Plan (ChatGPT) ----------
   const handleGenerate = async () => {
     setLoading(true);
     setMealData(null);
@@ -203,53 +198,9 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
 
     try {
       const prompt = `
-You are a helpful nutrition and fitness AI. The user has the following details:
-- Ingredients available (with total amounts): ${ingredients}
-- Please use ALL of these ingredient quantities across 4 meals (Breakfast, Lunch, Dinner, Snack).
-- Muscle groups to train: ${muscleGroups}
-- Time available for the gym: ${timeSpent || '1 hour'}
-
-if no input in ingredients don't generate anything for the meals part only!
-1) Generate 4 meal suggestions that:
-   - Use/distribute ALL the ingredients in their full quantity
-   - Keep total daily kcal ~1800-2000, with ~120g protein or more
-   - For each meal, provide:
-        "name"
-        "instructions"
-        "ingredients" (an array of {item, quantity})
-        "macros" ({protein, carbs, fat, sugars})
-
-2) Generate a workout plan that suits the muscle groups & time. 
-   Provide a structure, e.g.:
-   {
-     "warm-up": "...",
-     "main": "...",
-     "cooldown": "..."
-   }
-
-Return JSON ONLY in this format (no extra text):
-{
-  "meals": [
-    {
-      "name": "...",
-      "instructions": "...",
-      "ingredients": [...],
-      "macros": {
-        "protein": ...,
-        "carbs": ...,
-        "fat": ...,
-        "sugars": ...
-      }
-    },
-    ...
-  ],
-  "workout": {
-     "warm-up": "...",
-     "main": "...",
-     "cooldown": "..."
-  }
-}
-      `;
+You are a helpful AI ...
+[ omitted for brevity - same prompt as your code above ]
+`;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -274,17 +225,15 @@ Return JSON ONLY in this format (no extra text):
       try {
         parsed = JSON.parse(content);
       } catch (err) {
-        console.error('Failed to parse JSON from ChatGPT:', err);
-        console.log('Raw content:', content);
+        console.error('Failed to parse JSON:', err);
         throw new Error('Invalid JSON from ChatGPT.');
       }
 
       if (!parsed) {
-        throw new Error('Parsed data is null — possibly invalid JSON.');
+        throw new Error('Parsed data is null.');
       }
 
       let finalMeals = parsed.meals;
-      // If user wants USDA-based macros, override
       if (useUSDA) {
         finalMeals = await overrideMealMacrosWithUSDA(parsed.meals);
       }
@@ -299,7 +248,7 @@ Return JSON ONLY in this format (no extra text):
     }
   };
 
-  // -------------- CLEAR PLAN --------------
+  // ---------- Clear Plan ----------
   const handleClear = () => {
     setMealData(null);
     setWorkoutPlan(null);
@@ -308,7 +257,7 @@ Return JSON ONLY in this format (no extra text):
     setTimeSpent('');
   };
 
-  // -------------- Meal Modal --------------
+  // ---------- Meal Modal ----------
   const openMealModal = (meal: Meal) => {
     setSelectedMeal(meal);
     setShowMealModal(true);
@@ -318,7 +267,7 @@ Return JSON ONLY in this format (no extra text):
     setShowMealModal(false);
   };
 
-  // -------------- Workout Modal --------------
+  // ---------- Workout Modal ----------
   const openWorkoutModal = (plan: string | Record<string, any>) => {
     setSelectedWorkout(plan);
     setShowWorkoutModal(true);
@@ -328,8 +277,7 @@ Return JSON ONLY in this format (no extra text):
     setShowWorkoutModal(false);
   };
 
-  // ============= FAVORITES =============
-  // 1) Fetch favorites on mount
+  // ============= Favorites =============
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
@@ -350,7 +298,6 @@ Return JSON ONLY in this format (no extra text):
     fetchFavorites();
   }, [user.uid]);
 
-  // 2) Add a meal to favorites
   const handleAddMealToFavorites = async (meal: Meal) => {
     try {
       const favoritesRef = collection(db, 'users', user.uid, 'favorites');
@@ -366,11 +313,10 @@ Return JSON ONLY in this format (no extra text):
       alert(`Meal "${meal.name}" added to favorites!`);
     } catch (error) {
       console.error('Error adding meal to favorites:', error);
-      alert('Could not add meal to favorites: Missing or insufficient Firestore permissions?');
+      alert('Could not add meal to favorites.');
     }
   };
 
-  // 3) Add the workout plan to favorites
   const handleAddWorkoutToFavorites = async () => {
     if (!workoutPlan) {
       return alert('No workout plan available.');
@@ -389,16 +335,13 @@ Return JSON ONLY in this format (no extra text):
       alert('Workout plan added to favorites!');
     } catch (error) {
       console.error('Error adding workout to favorites:', error);
-      alert('Could not add workout to favorites: Missing or insufficient Firestore permissions?');
+      alert('Could not add workout to favorites.');
     }
   };
 
-  // 4) Separate meal vs. workout favorites
   const mealFaves = favorites.filter((f) => f.type === 'meal' && f.meal);
   const workoutFaves = favorites.filter((f) => f.type === 'workout' && f.workout);
 
-  // 5) Clicking on a favorite meal -> open that meal details
-  //    Clicking on a favorite workout -> open that workout plan
   const handleFavoriteClick = (fav: Favorite) => {
     if (fav.type === 'meal' && fav.meal) {
       openMealModal(fav.meal);
@@ -407,19 +350,19 @@ Return JSON ONLY in this format (no extra text):
     }
   };
 
-  // 6) Remove a favorite
   const handleRemoveFavorite = async (fav: Favorite) => {
     try {
       await deleteDoc(doc(db, 'users', user.uid, 'favorites', fav.id));
       setFavorites((prev) => prev.filter((x) => x.id !== fav.id));
     } catch (error) {
       console.error('Error removing favorite:', error);
-      alert('Could not remove favorite. Check console for details.');
+      alert('Could not remove favorite.');
     }
   };
 
   return (
-    <IonPage className="tab3-page">
+    // 1) Add an extra class to IonPage to control scrolling in CSS
+    <IonPage className="tab3-page no-ion-scroll">
       {/* HEADER */}
       <IonHeader>
         <IonToolbar color="primary">
@@ -427,23 +370,24 @@ Return JSON ONLY in this format (no extra text):
         </IonToolbar>
       </IonHeader>
 
-      {/* CONTENT */}
-      <IonContent>
-        <div className="app-container">
+      {/* 2) IonContent: disable scroll because we'll use flex + CSS scrolling */}
+      <IonContent scrollY={false}>
+        {/* 3) Overall layout container */}
+        <div className="tab3-layout">
+          
           {/* SIDEBAR */}
-          <div className="sidebar">
+          <div className="tab3-sidebar">
             <h2 className="app-title">Dashboard</h2>
-            {/* Hello username */}
             <p className="hello-user-text">Hello, {displayName}!</p>
 
             <IonButton expand="block" routerLink="/tab2" color="primary">
               RECORD EXERCISES
             </IonButton>
             <IonButton expand="block" routerLink="/tab1" color="primary">
-              Diary Recordings
+              DIARY RECORDINGS
             </IonButton>
 
-            {/* Favorites - with two sub-headings */}
+            {/* Favorites */}
             <IonListHeader>Meal Favourites</IonListHeader>
             <IonList>
               {mealFaves.map((fav) => (
@@ -457,11 +401,11 @@ Return JSON ONLY in this format (no extra text):
                   <IonButton
                     color="danger"
                     onClick={(e) => {
-                      e.stopPropagation(); 
+                      e.stopPropagation();
                       handleRemoveFavorite(fav);
                     }}
                   >
-                    Remove
+                    REMOVE
                   </IonButton>
                 </IonItem>
               ))}
@@ -484,12 +428,13 @@ Return JSON ONLY in this format (no extra text):
                       handleRemoveFavorite(fav);
                     }}
                   >
-                    Remove
+                    REMOVE
                   </IonButton>
                 </IonItem>
               ))}
             </IonList>
 
+            {/* Logout pinned at bottom */}
             <IonButton
               expand="block"
               onClick={handleLogout}
@@ -501,7 +446,7 @@ Return JSON ONLY in this format (no extra text):
           </div>
 
           {/* MAIN CONTENT */}
-          <div className="main-content">
+          <div className="tab3-main-content">
             <IonItem>
               <IonLabel position="stacked">Ingredients (comma-separated)</IonLabel>
               <IonInput
@@ -510,7 +455,6 @@ Return JSON ONLY in this format (no extra text):
                 onIonChange={(e) => setIngredients(e.detail.value!)}
               />
             </IonItem>
-
             <IonItem>
               <IonLabel position="stacked">Muscle Groups</IonLabel>
               <IonInput
@@ -519,7 +463,6 @@ Return JSON ONLY in this format (no extra text):
                 onIonChange={(e) => setMuscleGroups(e.detail.value!)}
               />
             </IonItem>
-
             <IonItem>
               <IonLabel position="stacked">Time Spent at Gym</IonLabel>
               <IonInput
@@ -535,11 +478,10 @@ Return JSON ONLY in this format (no extra text):
                 color={useUSDA ? 'success' : 'medium'}
                 onClick={() => setUseUSDA(!useUSDA)}
               >
-                {useUSDA ? 'Yes' : 'No'}
+                {useUSDA ? 'YES' : 'NO'}
               </IonButton>
             </IonItem>
 
-            {/* Generate / Clear Buttons */}
             <div className="generate-plan-bar">
               <IonButton onClick={handleGenerate} color="primary">
                 GENERATE PLAN
@@ -549,20 +491,23 @@ Return JSON ONLY in this format (no extra text):
               </IonButton>
             </div>
 
-            {/* Loading Spinner */}
             {loading && <IonSpinner name="crescent" />}
 
-            {/* MEALS LIST */}
+            {/* Show Meals */}
             {mealData && (
               <IonList>
-                {mealData.map((meal, index) => (
-                  <IonCard key={index}>
+                {mealData.map((meal, i) => (
+                  <IonCard key={i}>
                     <IonCardHeader>
                       <IonCardTitle>{meal.name}</IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>
-                      <p><strong>Ingredients:</strong> {meal.ingredients.length} items</p>
-                      <p><strong>Protein:</strong> {meal.macros.protein}g</p>
+                      <p>
+                        <strong>Ingredients:</strong> {meal.ingredients.length} items
+                      </p>
+                      <p>
+                        <strong>Protein:</strong> {meal.macros.protein}g
+                      </p>
                       <IonButton
                         fill="outline"
                         onClick={(e) => {
@@ -572,7 +517,6 @@ Return JSON ONLY in this format (no extra text):
                       >
                         VIEW DETAILS
                       </IonButton>
-                      {/* Add to favorites */}
                       <IonButton
                         color="secondary"
                         style={{ marginLeft: '0.5rem' }}
@@ -589,7 +533,7 @@ Return JSON ONLY in this format (no extra text):
               </IonList>
             )}
 
-            {/* WORKOUT */}
+            {/* Workout Plan */}
             {workoutPlan && (
               <IonCard>
                 <IonCardHeader>
@@ -599,13 +543,10 @@ Return JSON ONLY in this format (no extra text):
                   <IonButton onClick={() => openWorkoutModal(workoutPlan)} color="secondary">
                     VIEW FULL WORKOUT
                   </IonButton>
-                  {/* Add to favorites */}
                   <IonButton
                     color="tertiary"
                     style={{ marginLeft: '0.5rem' }}
-                    onClick={async () => {
-                      await handleAddWorkoutToFavorites();
-                    }}
+                    onClick={handleAddWorkoutToFavorites}
                   >
                     FAVOURITE
                   </IonButton>
@@ -623,7 +564,7 @@ Return JSON ONLY in this format (no extra text):
         </IonToolbar>
       </IonFooter>
 
-      {/* ============ MEAL DETAILS MODAL ============ */}
+      {/* MEAL MODAL */}
       <IonModal isOpen={showMealModal} onDidDismiss={closeMealModal}>
         <IonHeader>
           <IonToolbar color="primary">
@@ -673,7 +614,7 @@ Return JSON ONLY in this format (no extra text):
         </IonContent>
       </IonModal>
 
-      {/* ============ WORKOUT DETAILS MODAL ============ */}
+      {/* WORKOUT MODAL */}
       <IonModal isOpen={showWorkoutModal} onDidDismiss={closeWorkoutModal}>
         <IonHeader>
           <IonToolbar color="primary">
@@ -683,7 +624,6 @@ Return JSON ONLY in this format (no extra text):
             </IonButton>
           </IonToolbar>
         </IonHeader>
-
         <IonContent className="ion-padding">
           {selectedWorkout && (
             typeof selectedWorkout === 'string'

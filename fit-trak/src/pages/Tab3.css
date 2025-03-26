@@ -1,15 +1,26 @@
-/* Tab3.css */
+/* Make sure IonPage can fill the screen but NOT scroll. */
+.tab3-page.no-ion-scroll ion-content {
+  /* Use our own layout scrolling instead of IonContent's scroll */
+  height: 100%;
+  --ion-background-color: #fff; /* optional override */
+}
 
-/* Container for the sidebar & main content side by side */
-.tab3-page .app-container {
+/* The parent container for sidebar + main content side-by-side */
+.tab3-layout {
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 100%; /* fill the content area */
+  /* 
+    Fill the visible area minus header/footer. If your IonHeader is ~56px tall
+    and IonFooter ~44px, you can do something like:
+  */
+  height: calc(100vh - var(--ion-safe-area-top) - var(--ion-safe-area-bottom) - 56px - 44px);
+  /* Or if you prefer just 100% of IonContent, you can keep 'height: 100%;' 
+     as well—depends on your visual needs. */
 }
 
-/* Sidebar on the left */
-.tab3-page .sidebar {
+/* SIDEBAR */
+.tab3-sidebar {
   width: 250px;
   background-color: #007aff;
   color: #fff;
@@ -17,9 +28,16 @@
   flex-direction: column;
   box-sizing: border-box;
   padding: 1rem;
+
+  /* Let the sidebar scroll if content is too tall */
+  overflow-y: auto;
+
+  /* If we want it pinned, we can do position: sticky; top: 0; 
+     but typically flex + overflow is enough. 
+  */
 }
 
-/* Title inside the sidebar */
+/* Title in the sidebar */
 .tab3-page .app-title {
   font-size: 1.8rem;
   font-weight: bold;
@@ -27,24 +45,27 @@
   margin-bottom: 1.5rem;
 }
 
-/* Button at the bottom of the sidebar */
+/* Keep the logout button pinned at bottom of the sidebar */
 .tab3-page .logout-button {
-  margin-top: auto;
+  margin-top: auto; 
+  width: 100%;
 }
 
-/* Main content area to the right */
-.tab3-page .main-content {
+/* MAIN CONTENT */
+.tab3-main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   background-color: #f9f9f9;
   padding: 1rem;
+
+  /* Let main content scroll if it grows beyond the container */
   overflow-y: auto;
 }
 
 /* That bar containing the "Generate Plan" button */
-.tab3-page .generate-plan-bar {
+.generate-plan-bar {
   margin-top: 1.5rem;
   background-color: #007aff;
   color: #fff;
@@ -52,11 +73,11 @@
   padding: 0.75rem 1rem;
 }
 
-.tab3-page .generate-plan-bar ion-button {
+.generate-plan-bar ion-button {
   --background: #005be1;
 }
 
-/* Optional: styling the IonFooter just on Tab3 */
+/* IonFooter styling (optional) */
 .tab3-page ion-footer {
   --background: #007aff;
   --color: #fff;
