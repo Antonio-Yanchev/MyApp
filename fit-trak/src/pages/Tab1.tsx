@@ -61,8 +61,6 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [chartData, setChartData] = useState<any>(null);
-
-  // For the selected day's entries in the modal
   const [selectedDayEntries, setSelectedDayEntries] = useState<DiaryEntry[]>([]);
 
   // Logout function
@@ -76,19 +74,19 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
     }
   };
 
-  /*
-    Handle food search using the USDA API (nutrientNumber approach for sugar = 269).
-  */
+  // USDA API Search
   const handleSearch = async () => {
     if (!queryText) return;
     try {
       setLoading(true);
-      const apiKey = 'IanzK0U4XKzv8hi50hZqD3gfkcBmodWurWh1gIsS';
+      const apiKey = import.meta.env.VITE_USDA_API_KEY ?? '';
       const baseUrl = 'https://api.nal.usda.gov/fdc/v1/foods/search';
+
       const params = new URLSearchParams({
         query: queryText,
         api_key: apiKey,
       });
+
       const url = `${baseUrl}?${params.toString()}`;
       const response = await fetch(url);
       if (!response.ok) {
@@ -205,11 +203,13 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
   };
 
   return (
-    <IonPage>
+    <IonPage className="tab1-page">
       {/* Header (Blue) */}
       <IonHeader>
         <IonToolbar color="primary">
-          <IonTitle><h1>Fit-Trak</h1></IonTitle>
+          <IonTitle>
+            <h1>Fit-Trak</h1>
+          </IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -231,11 +231,8 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
           {/* ========== Main Content ========== */}
           <div className="main-content">
             <IonGrid>
-
               {/* ========== Search bar row ========== */}
               <IonRow className="ion-justify-content-center">
-                {/* On small screens: 12/12 (full width).
-                    On medium+ screens: 5/12 (~40% width). */}
                 <IonCol size="12" sizeMd="12">
                   <IonSearchbar
                     placeholder="Search foods..."

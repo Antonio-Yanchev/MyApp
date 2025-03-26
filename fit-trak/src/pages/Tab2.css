@@ -1,5 +1,17 @@
+/* =====================
+   Tab2 Page SCOPING
+   ===================== */
+/* If you need Ion variables or a custom theme only on Tab2, place them in .tab2-page */
+.tab2-page {
+  /* Example Ion variables – optional:
+  --ion-color-primary: #3880ff;
+  --ion-color-secondary: #e74c3c;
+  etc.
+  */
+}
+
 /* Container that holds sidebar + main content side by side */
-.tab2-app-container {
+.tab2-page .tab2-app-container {
   display: flex;
   flex-direction: row;
   height: 100vh; /* Fill vertical space */
@@ -9,58 +21,51 @@
 }
 
 /* Sidebar styling */
-.tab2-sidebar {
-  width: 250px; /* Adjust if you want it narrower/wider */
+.tab2-page .tab2-sidebar {
+  width: 250px;
   background-color: #0066ff;
   padding: 1rem;
   box-sizing: border-box;
 }
 
-/* Title in the sidebar */
-.tab2-app-title {
-  
+.tab2-page .tab2-app-title {
   font-size: 2.6rem;
   font-weight: bold;
-  margin-bottom: 30px;
+  margin-bottom: 2rem;
   text-align: center;
   color: #fff;
-  margin-bottom: 2rem;
 }
 
 /* Make sidebar buttons fill the sidebar width */
-.tab2-sidebar ion-button {
+.tab2-page .tab2-sidebar ion-button {
   margin-bottom: 1rem;
   width: 100%;
 }
 
 /* Main content area (Header, Content, Footer) */
-.tab2-main-content {
+.tab2-page .tab2-main-content {
   flex: 1; /* Fill remaining space */
   display: flex;
   flex-direction: column;
 }
 
-/* =========================
-   EDIT & DELETE BUTTONS
-   ========================= */
-
-/* When using IonButton with class="edit-button" */
-.ion-button.edit-button {
-  --background: #007bff;    /* Blue background */
-  --color: #ffffff;         /* White text */
+/* Edit button */
+.tab2-page .ion-button.edit-button {
+  --background: #007bff; /* Blue background */
+  --color: #ffffff;      /* White text */
   --border-radius: 4px;
   --padding-start: 0.6rem;
   --padding-end: 0.6rem;
   --padding-top: 0.3rem;
   --padding-bottom: 0.3rem;
   font-size: 0.85rem;
-  margin-right: 0.5rem;  /* spacing between edit & delete */
+  margin-right: 0.5rem; /* spacing between edit & delete */
 }
 
-/* When using IonButton with class="delete-button" */
-.ion-button.delete-button {
-  --background: #dc3545;    /* Red background */
-  --color: #ffffff;         /* White text */
+/* Delete button */
+.tab2-page .ion-button.delete-button {
+  --background: #dc3545; /* Red background */
+  --color: #ffffff;      /* White text */
   --border-radius: 4px;
   --padding-start: 0.6rem;
   --padding-end: 0.6rem;

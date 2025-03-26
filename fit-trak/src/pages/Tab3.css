@@ -1,62 +1,70 @@
-/* A handy utility to remove IonContent's default scrolling and let us handle layout ourselves */
-.no-scroll {
-   --ion-background-color: #fff;
-   height: 100%;
- }
- 
- /* Container that holds the sidebar and the main content side by side */
- .app-container {
-   display: flex;
-   flex-direction: row;
-   height: 100%;
-   width: 100%;
-   background-color: #fff; 
- }
- 
- /* Sidebar on the left */
- .sidebar {
-   width: 250px;
-   background-color: #007aff; 
-   color: #fff;
-   display: flex;
-   flex-direction: column;
-   box-sizing: border-box;
-   padding: 1rem;
- }
- 
- /* Title inside the sidebar */
- .sidebar .app-title {
-   font-size: 2rem;
-   font-weight: bold;
-   text-align: center;
-   margin-bottom: 1.5rem;
- }
- 
- /* Button that sits at the bottom of the sidebar */
- .logout-button {
-   margin-top: auto;
- }
- 
- /* The main content area to the right of the sidebar */
- .main-content {
-   flex: 1;
-   background-color: #f9f9f9;
-   display: flex;
-   flex-direction: column;
-   box-sizing: border-box;
-   padding: 1rem;
- }
- 
- /* That bar containing the "Generate Plan" button */
- .generate-plan-bar {
-   margin-top: 1.5rem;
-   background-color: #007aff;
-   color: #fff;
-   text-align: right;
-   padding: 0.75rem 1rem;
- }
- 
- .generate-plan-bar ion-button {
-   --background: #005be1;
- }
- 
+/* ============= Tab3 Page Scoping ============= */
+.tab3-page {
+  /* You can define Ion color variables if you want them just on Tab3
+     e.g.:
+     --ion-color-primary: #3880ff;
+     etc.
+  */
+}
+
+/* Container for the sidebar & main content side by side */
+.tab3-page .app-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%; /* fill the content area */
+}
+
+/* Sidebar on the left */
+.tab3-page .sidebar {
+  width: 250px;
+  background-color: #007aff;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 1rem;
+}
+
+/* Title inside the sidebar */
+.tab3-page .app-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Button at the bottom of the sidebar */
+.tab3-page .logout-button {
+  margin-top: auto;
+}
+
+/* Main content area to the right */
+.tab3-page .main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* That bar containing the "Generate Plan" button */
+.tab3-page .generate-plan-bar {
+  margin-top: 1.5rem;
+  background-color: #007aff;
+  color: #fff;
+  text-align: right;
+  padding: 0.75rem 1rem;
+}
+
+.tab3-page .generate-plan-bar ion-button {
+  --background: #005be1;
+}
+
+/* Optional: styling the IonFooter just on Tab3 */
+.tab3-page ion-footer {
+  --background: #007aff;
+  --color: #fff;
+}

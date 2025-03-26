@@ -116,7 +116,7 @@ interface ExerciseEntry {
   userId: string;
   exerciseName: string;
   duration: number; // in minutes
-  dateTime: string; // ISO date string, e.g. "2025-03-07T10:20:00.000Z"
+  dateTime: string; // ISO date string
   notes?: string;
   createdAt?: any;
   caloriesBurned?: number;
@@ -166,18 +166,13 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
 
         if (snapshot.exists()) {
           const data = snapshot.data();
-          if (data && data.weight) {
-            setUserWeight(data.weight);
-          }
-          if (data && data.height) {
-            setUserHeight(data.height); // OPTIONAL
-          }
+          if (data && data.weight) setUserWeight(data.weight);
+          if (data && data.height) setUserHeight(data.height); // OPTIONAL
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
       }
     };
-
     if (user.uid) {
       fetchProfile();
     }
@@ -237,7 +232,6 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
   // 4) CREATE NEW EXERCISE
   // =========================
   const handleSaveExercise = async () => {
-    // Make sure user has set weight before saving exercises
     if (!userWeight) {
       alert('Please set your weight in the Profile first!');
       return;
@@ -336,7 +330,6 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
     }
 
     try {
-      // Recalculate calories if name/duration changed
       const exerciseKey = exerciseToEdit.exerciseName.toLowerCase();
       const metValue = MET_VALUES[exerciseKey] || 6.0;
       const durationInHours = exerciseToEdit.duration / 60;
@@ -405,12 +398,12 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
   });
 
   return (
-    <IonPage>
+    // NOTE: We add the className here:
+    <IonPage className="tab2-page">
       <div className="tab2-app-container">
         {/* Sidebar */}
         <div className="tab2-sidebar">
           <h2 className="tab2-app-title">Dashboard</h2>
-          {/* Removed the Profile button from here */}
           <IonButton expand="block" routerLink="/tab1">
             Dairy recording
           </IonButton>
