@@ -21,7 +21,7 @@ const Login: React.FC = () => {
     try {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       console.log('Login successful:', userCred.user);
-      history.push('/tab1');
+      history.push('/NutritionLogging'); // Redirect to the main app page after login
     } catch (error: any) {
       console.error('Login error:', error);
       alert(error.message);

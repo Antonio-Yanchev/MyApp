@@ -55,7 +55,7 @@ import {
 } from 'chart.js';
 
 import { auth, db } from '../firebaseConfig';
-import './Tab2.css';
+import './ExerciseRecording.css';
 import { pin, closeCircle } from 'ionicons/icons';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ChartTitle, Tooltip, Legend);
@@ -447,10 +447,10 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
             <IonButton expand="block" onClick={() => setShowProfileModal(true)}>
               Profile
             </IonButton>
-            <IonButton expand="block" routerLink="/tab1">
-              Diary Recording
+            <IonButton expand="block" routerLink="/NutritionLogging">
+              Nutrition recording
             </IonButton>
-            <IonButton expand="block" routerLink="/tab3">
+            <IonButton expand="block" routerLink="/Meal-WorkoutGeneration">
               Generate Meal Plan
             </IonButton>
 

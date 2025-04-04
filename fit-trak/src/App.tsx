@@ -22,9 +22,9 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
-import Tab1 from './pages/Tab1';
-import Tab2 from './pages/Tab2';
-import Tab3 from './pages/Tab3';
+import Tab1 from './pages/NutritionLogging';
+import Tab2 from './pages/ExerciseRecording';
+import Tab3 from './pages/Meal-WorkoutGeneration';
 
 /* Ionic & CSS imports */
 import '@ionic/react/css/core.css';
@@ -74,20 +74,20 @@ const App: React.FC = () => {
           <IonContent>
             <IonList>
               <IonMenuToggle autoHide={false}>
-                <IonItem routerLink="/tab1" routerDirection="root">
-                  Tab1
+                <IonItem routerLink="/NutritionLogging" routerDirection="root">
+                  NutritionLogging
                 </IonItem>
               </IonMenuToggle>
 
               <IonMenuToggle autoHide={false}>
-                <IonItem routerLink="/tab2" routerDirection="root">
-                  Tab2
+                <IonItem routerLink="/ExerciseRecording" routerDirection="root">
+                  ExerciseRecording
                 </IonItem>
               </IonMenuToggle>
 
               <IonMenuToggle autoHide={false}>
-                <IonItem routerLink="/tab3" routerDirection="root">
-                  Tab3
+                <IonItem routerLink="/Meal-WorkoutGeneration" routerDirection="root">
+                  Meal-WorkoutGeneration
                 </IonItem>
               </IonMenuToggle>
             </IonList>
@@ -107,19 +107,19 @@ const App: React.FC = () => {
           </Route>
 
           {/* Protected routes */}
-          <Route exact path="/tab1">
+          <Route exact path="/NutritionLogging">
             {loggedIn ? <Tab1 user={user!} /> : <Redirect to="/login" />}
           </Route>
-          <Route exact path="/tab2">
+          <Route exact path="/ExerciseRecording">
             {loggedIn ? <Tab2 user={user!} /> : <Redirect to="/login" />}
           </Route>
-          <Route exact path="/tab3">
+          <Route exact path="/Meal-WorkoutGeneration">
             {loggedIn ? <Tab3 user={user!} /> : <Redirect to="/login" />}
           </Route>
 
           {/* Default route */}
           <Route exact path="/">
-            {loggedIn ? <Redirect to="/tab1" /> : <Redirect to="/login" />}
+            {loggedIn ? <Redirect to="/NutritionLogging" /> : <Redirect to="/login" />}
           </Route>
         </IonRouterOutlet>
       </IonReactRouter>

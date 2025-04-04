@@ -41,7 +41,7 @@ import {
   Legend
 } from 'chart.js';
 import { User } from 'firebase/auth';
-import './Tab1.css';
+import './NutritionLogging.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -63,11 +63,11 @@ interface DiaryEntry {
   date: string;
 }
 
-type Tab1Props = {
+type NutritionLoggingProps = {
   user: User;
 };
 
-const Tab1: React.FC<Tab1Props> = ({ user }) => {
+const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
   // Use displayName or fallback to email
   const displayName = user.displayName || user.email || 'User';
 
@@ -272,10 +272,10 @@ const Tab1: React.FC<Tab1Props> = ({ user }) => {
             {/* The new "Hello, {displayName}" text below */}
             <p className="hello-user-text">Hello, {displayName}!</p>
 
-            <IonButton expand="block" routerLink="/tab2">
+            <IonButton expand="block" routerLink="/ExerciseRecording">
               Record Exercises
             </IonButton>
-            <IonButton routerLink="/tab3">Test</IonButton>
+            <IonButton routerLink="/Meal-WorkoutGeneration">Meals</IonButton>
             <IonButton className="logout-button" color="danger" onClick={handleLogout}>
               Logout
             </IonButton>

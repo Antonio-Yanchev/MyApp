@@ -32,7 +32,7 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 
-import './Tab3.css';
+import './Meal-WorkoutGeneration.css';
 
 import { Pie } from 'react-chartjs-2';
 import {
@@ -380,10 +380,10 @@ You are a helpful AI ...
             <h2 className="app-title">Dashboard</h2>
             <p className="hello-user-text">Hello, {displayName}!</p>
 
-            <IonButton expand="block" routerLink="/tab2" color="primary">
+            <IonButton expand="block" routerLink="/ExerciseRecording" color="primary">
               RECORD EXERCISES
             </IonButton>
-            <IonButton expand="block" routerLink="/tab1" color="primary">
+            <IonButton expand="block" routerLink="/NutritionLogging" color="primary">
               DIARY RECORDINGS
             </IonButton>
 
