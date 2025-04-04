@@ -198,9 +198,53 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
 
     try {
       const prompt = `
-You are a helpful AI ...
-[ omitted for brevity - same prompt as your code above ]
-`;
+      You are a helpful nutrition and fitness AI. The user has the following details:
+      - Ingredients available (with total amounts): ${ingredients}
+      - Please use ALL of these ingredient quantities across 4 meals (Breakfast, Lunch, Dinner, Snack).
+      - Muscle groups to train: ${muscleGroups}
+      - Time available for the gym: ${timeSpent || '1 hour'}
+      
+      if no input in ingredients don't generate anything for the meals part only!
+      1) Generate 4 meal suggestions that:
+         - Use/distribute ALL the ingredients in their full quantity
+         - Keep total daily kcal ~1800-2000, with ~120g protein or more
+         - For each meal, provide:
+              "name"
+              "instructions"
+              "ingredients" (an array of {item, quantity})
+              "macros" ({protein, carbs, fat, sugars})
+      
+      2) Generate a workout plan that suits the muscle groups & time. 
+         Provide a structure, e.g.:
+         {
+           "warm-up": "...",
+           "main": "...",
+           "cooldown": "..."
+         }
+      
+      Return JSON ONLY in this format (no extra text):
+      {
+        "meals": [
+          {
+            "name": "...",
+            "instructions": "...",
+            "ingredients": [...],
+            "macros": {
+              "protein": ...,
+              "carbs": ...,
+              "fat": ...,
+              "sugars": ...
+            }
+          },
+          ...
+        ],
+        "workout": {
+           "warm-up": "...",
+           "main": "...",
+           "cooldown": "..."
+        }
+      }
+            `;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -366,7 +410,7 @@ You are a helpful AI ...
       {/* HEADER */}
       <IonHeader>
         <IonToolbar color="primary">
-          <IonTitle>Meal & Workout Dashboard</IonTitle>
+          <IonTitle>Meal & Workout</IonTitle>
         </IonToolbar>
       </IonHeader>
 
