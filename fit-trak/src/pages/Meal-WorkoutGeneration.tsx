@@ -425,14 +425,14 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
             <p className="hello-user-text">Hello, {displayName}!</p>
 
             <IonButton expand="block" routerLink="/ExerciseRecording" color="primary">
-              RECORD EXERCISES
+              Record Exercises
             </IonButton>
             <IonButton expand="block" routerLink="/NutritionLogging" color="primary">
-              DIARY RECORDINGS
+              Nutrition Recording
             </IonButton>
 
             {/* Favorites */}
-            <IonListHeader>Meal Favourites</IonListHeader>
+            <IonListHeader>Meal Favourites:</IonListHeader>
             <IonList>
               {mealFaves.map((fav) => (
                 <IonItem
@@ -455,7 +455,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
               ))}
             </IonList>
 
-            <IonListHeader>Workout Favourites</IonListHeader>
+            <IonListHeader>Workout Favourites:</IonListHeader>
             <IonList>
               {workoutFaves.map((fav) => (
                 <IonItem
@@ -485,7 +485,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
               color="danger"
               className="logout-button"
             >
-              LOGOUT
+              Log out
             </IonButton>
           </div>
 
@@ -522,16 +522,16 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
                 color={useUSDA ? 'success' : 'medium'}
                 onClick={() => setUseUSDA(!useUSDA)}
               >
-                {useUSDA ? 'YES' : 'NO'}
+                {useUSDA ? 'Yes' : 'No'}
               </IonButton>
             </IonItem>
 
             <div className="generate-plan-bar">
               <IonButton onClick={handleGenerate} color="primary">
-                GENERATE PLAN
+                Generate Plan
               </IonButton>
               <IonButton onClick={handleClear} color="medium" style={{ marginLeft: '8px' }}>
-                CLEAR PLAN
+                Clear Plan
               </IonButton>
             </div>
 
@@ -604,7 +604,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
       {/* FOOTER */}
       <IonFooter>
         <IonToolbar color="primary">
-          <IonTitle>© 2025 FIT-TRAK</IonTitle>
+          <IonTitle className="footer-title3"> © 2025 FIT-TRAK</IonTitle>
         </IonToolbar>
       </IonFooter>
 

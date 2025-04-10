@@ -2,18 +2,19 @@
   /* no vertical scrolling from IonContent itself */
   --ion-background-color: #fff;
   height: 100%;
+  text-transform: none !important;
 }
 
 /* The parent container for sidebar + main content */
-.tab2-layout {
+.tab2-layout{
   display: flex;
   flex-direction: row;
   width: 100%;
   height: calc(100vh - var(--ion-safe-area-top) - var(--ion-safe-area-bottom) - 56px);
-  /* Explanation:
-     - 56px is IonHeader height (approx). 
-     - If you have IonFooter, adjust the calculation or test visually.
-  */
+}
+
+.footer-title2{
+  text-align: center;
 }
 
 /* SIDEBAR (sticky/fixed) */
@@ -91,10 +92,19 @@
   --color: #ffffff;
   font-size: 0.85rem;
   margin-right: 0.5rem;
+  text-transform: none !important;
+  
 }
 
 .ion-button.delete-button {
   --background: #dc3545;
   --color: #ffffff;
   font-size: 0.85rem;
+  text-transform: none !important;
 }
+
+/* Override default Ionic button text capitalization */
+ion-button {
+  text-transform: none !important;
+}
+

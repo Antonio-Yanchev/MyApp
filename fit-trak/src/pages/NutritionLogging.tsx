@@ -269,15 +269,28 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
           {/* SIDEBAR */}
           <div className="sidebar">
             <h2 className="app-title">Dashboard</h2>
-            {/* The new "Hello, {displayName}" text below */}
             <p className="hello-user-text">Hello, {displayName}!</p>
 
-            <IonButton expand="block" routerLink="/ExerciseRecording">
+            <IonButton 
+              expand="block" 
+              routerLink="/ExerciseRecording" 
+              style={{ textTransform: 'none' }}
+            >
               Record Exercises
             </IonButton>
-            <IonButton routerLink="/Meal-WorkoutGeneration">Meals</IonButton>
-            <IonButton className="logout-button" color="danger" onClick={handleLogout}>
-              Logout
+            <IonButton 
+              routerLink="/Meal-WorkoutGeneration" 
+              style={{ textTransform: 'none' }}
+            >
+              Generate Meals
+            </IonButton>
+            <IonButton 
+              className="logout-button" 
+              color="danger" 
+              onClick={handleLogout}
+              style={{ textTransform: 'none' }}
+            >
+              Log out
             </IonButton>
           </div>
 
@@ -308,7 +321,11 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
               {/* Search Button */}
               <IonRow className="ion-justify-content-center">
                 <IonCol size="12">
-                  <IonButton onClick={handleSearch} expand="block">
+                  <IonButton 
+                    onClick={handleSearch} 
+                    expand="block"
+                    style={{ textTransform: 'none' }}
+                  >
                     Search
                   </IonButton>
                 </IonCol>
@@ -345,6 +362,7 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
                               onClick={() => handleAddToDiary(product)}
                               color="secondary"
                               size="small"
+                              style={{ textTransform: 'none' }}
                             >
                               Add to Diary
                             </IonButton>
@@ -358,7 +376,7 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
                 <>
                   <IonRow className="ion-justify-content-center">
                     <IonCol size="12">
-                      <h1 className="diary-title">Your Exercise Overview:</h1>
+                      <h1 className="diary-title">Your Day Overview:</h1>
                     </IonCol>
                   </IonRow>
 
@@ -400,6 +418,9 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
                                 <p>Fat: {totalFat}g</p>
                                 <p>Sugars: {totalSugars}g</p>
 
+                                {/* Added title for items */}
+                                <p><strong>Items for this day:</strong></p>
+
                                 {/* Each item in this date */}
                                 {entries.map((entry) => (
                                   <div
@@ -424,8 +445,9 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
                                           e.stopPropagation(); // prevent day-card click
                                           handleDeleteDiaryEntry(entry.id);
                                         }}
+                                        style={{ textTransform: 'none' }}
                                       >
-                                        DELETE
+                                        Delete item
                                       </IonButton>
                                     </IonButtons>
                                   </div>
@@ -438,8 +460,9 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
                                     e.stopPropagation();
                                     handleDeleteDay(date);
                                   }}
+                                  style={{ textTransform: 'none' }}
                                 >
-                                  DELETE DAY
+                                  Delete Day
                                 </IonButton>
                               </IonCardContent>
                             </IonCard>
@@ -489,7 +512,11 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
         </IonContent>
         <IonFooter>
           <IonToolbar>
-            <IonButton expand="block" onClick={() => setModalOpen(false)}>
+            <IonButton 
+              expand="block" 
+              onClick={() => setModalOpen(false)}
+              style={{ textTransform: 'none' }}
+            >
               Close
             </IonButton>
           </IonToolbar>

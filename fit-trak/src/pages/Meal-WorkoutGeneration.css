@@ -2,7 +2,7 @@
 .tab3-page.no-ion-scroll ion-content {
   /* Use our own layout scrolling instead of IonContent's scroll */
   height: 100%;
-  --ion-background-color: #fff; /* optional override */
+  ion-background-color: #fff; /* optional override */
 }
 
 /* The parent container for sidebar + main content side-by-side */
@@ -16,13 +16,14 @@
   */
   height: calc(100vh - var(--ion-safe-area-top) - var(--ion-safe-area-bottom) - 56px - 44px);
   /* Or if you prefer just 100% of IonContent, you can keep 'height: 100%;' 
-     as well—depends on your visual needs. */
+     as well—depends on your visual needs.
+  */
 }
 
 /* SIDEBAR */
 .tab3-sidebar {
   width: 250px;
-  background-color: #007aff;
+  background-color: #0066ff;
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -31,10 +32,6 @@
 
   /* Let the sidebar scroll if content is too tall */
   overflow-y: auto;
-
-  /* If we want it pinned, we can do position: sticky; top: 0; 
-     but typically flex + overflow is enough. 
-  */
 }
 
 /* Title in the sidebar */
@@ -67,18 +64,24 @@
 /* That bar containing the "Generate Plan" button */
 .generate-plan-bar {
   margin-top: 1.5rem;
-  background-color: #007aff;
+  background-color: #007bff;
   color: #fff;
   text-align: right;
   padding: 0.75rem 1rem;
 }
 
 .generate-plan-bar ion-button {
-  --background: #005be1;
+  background: #005be1;
 }
 
 /* IonFooter styling (optional) */
-.tab3-page ion-footer {
-  --background: #007aff;
-  --color: #fff;
+.tab3-page ion-footer,footer-title3 {
+  background: #007aff;
+  color: #fff;
+  text-align: center;
+}
+
+/* Override default Ionic button text capitalization */
+ion-button {
+  text-transform: none !important;
 }

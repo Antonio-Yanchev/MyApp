@@ -448,14 +448,14 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
               Profile
             </IonButton>
             <IonButton expand="block" routerLink="/NutritionLogging">
-              Nutrition recording
+              Nutrition Recording
             </IonButton>
             <IonButton expand="block" routerLink="/Meal-WorkoutGeneration">
-              Generate Meal Plan
+              Generate Meals
             </IonButton>
 
             {/* PINNED EXERCISES */}
-            <IonListHeader>Pinned Exercises</IonListHeader>
+            <IonListHeader>Pinned Exercises:</IonListHeader>
             <IonList>
               {pinnedExercises.map((p) => (
                 <IonItem
@@ -485,16 +485,16 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
               onClick={handleLogout}
               className="logout-button"
             >
-              Logout
+              Log out
             </IonButton>
           </div>
 
           {/* MAIN CONTENT */}
           <div className="tab2-main-content">
-            <h2>Record Your Exercise</h2>
+            <h1>Record Your Exercise</h1>
             <IonList>
               <IonItem>
-                <IonLabel position="stacked">Exercise Name</IonLabel>
+                <IonLabel position="stacked">Exercise Name:</IonLabel>
                 <IonInput
                   value={exerciseName}
                   placeholder="e.g., Running"
@@ -503,7 +503,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
               </IonItem>
 
               <IonItem>
-                <IonLabel position="stacked">Duration (minutes)</IonLabel>
+                <IonLabel position="stacked">Duration (minutes):</IonLabel>
                 <IonInput
                   type="number"
                   value={duration}
@@ -513,7 +513,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
               </IonItem>
 
               <IonItem>
-                <IonLabel position="stacked">Date & Time</IonLabel>
+                <IonLabel position="stacked">Date & Time:</IonLabel>
                 <IonDatetime
                   presentation="date-time"
                   value={dateTime}
@@ -527,7 +527,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
               </IonItem>
 
               <IonItem>
-                <IonLabel position="stacked">Notes</IonLabel>
+                <IonLabel position="stacked">Notes:</IonLabel>
                 <IonTextarea
                   value={notes}
                   placeholder="Additional details..."
@@ -537,10 +537,10 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
             </IonList>
 
             <IonButton expand="block" color="success" onClick={handleSaveExercise}>
-              SAVE EXERCISE
+              Save Exercise
             </IonButton>
 
-            <h2 style={{ marginTop: '2rem' }}>Your Exercises</h2>
+            <h2 style={{ marginTop: '2rem' }}>Your Exercises:</h2>
             <IonGrid>
               {Object.keys(groupedExercises).length === 0 ? (
                 <IonRow>
@@ -584,19 +584,19 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                                   className="edit-button"
                                   onClick={() => openEditModal(entry)}
                                 >
-                                  EDIT
+                                  Edit
                                 </IonButton>
                                 <IonButton
                                   className="delete-button"
                                   onClick={() => handleDeleteExercise(entry.id)}
                                 >
-                                  DELETE
+                                  Delete
                                 </IonButton>
                                 <IonButton
                                   fill="outline"
                                   onClick={() => handlePinExercise(entry)}
                                 >
-                                  PIN
+                                  Pin
                                 </IonButton>
                               </IonButtons>
                             </div>
@@ -615,7 +615,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
       {/* FOOTER */}
       <IonFooter>
         <IonToolbar color="primary">
-          <IonTitle>© 2025 FIT-TRAK</IonTitle>
+          <IonTitle className="footer-title2">© 2025 FIT-TRAK</IonTitle>
         </IonToolbar>
       </IonFooter>
 
@@ -623,7 +623,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
       <IonModal isOpen={showProfileModal} onDidDismiss={() => setShowProfileModal(false)}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Edit Profile</IonTitle>
+            <IonTitle>Please Enter your details:</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
@@ -671,10 +671,6 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
       >
         <IonHeader>
           <IonToolbar>
-            {/* 
-              KEY CHANGE: we show exercise date (e.g., 2025-03-26) in the title. 
-              .split('T')[0] just grabs YYYY-MM-DD from an ISO string. 
-            */}
             <IonTitle>
               {selectedExercise
                 ? `${selectedExercise.exerciseName} (${selectedExercise.dateTime.split('T')[0]}) Details`
@@ -756,7 +752,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                 />
               </IonItem>
               <IonItem>
-                <IonLabel position="stacked">Notes</IonLabel>
+                <IonLabel position="stacked">Notes:</IonLabel>
                 <IonTextarea
                   value={exerciseToEdit.notes}
                   onIonChange={(e) =>
