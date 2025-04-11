@@ -48,7 +48,7 @@ const ForgotPassword: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar color="primary">
+        <IonToolbar className="FPHeader" color="primary">
           <IonTitle>Fit-Trak</IonTitle>
         </IonToolbar>
       </IonHeader>
@@ -87,7 +87,7 @@ const ForgotPassword: React.FC = () => {
       </IonContent>
 
       <IonFooter>
-        <IonToolbar color="primary">
+        <IonToolbar className="FPFooter" color="primary">
           <IonTitle>© 2025 Fit-Trak</IonTitle>
         </IonToolbar>
       </IonFooter>

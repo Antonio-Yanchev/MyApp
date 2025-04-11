@@ -31,7 +31,7 @@ const Login: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar color="primary">
+        <IonToolbar className="LoginPage" color="primary">
           <IonTitle>Fit-Trak</IonTitle>
         </IonToolbar>
       </IonHeader>
@@ -71,7 +71,7 @@ const Login: React.FC = () => {
       </IonContent>
 
       <IonFooter>
-        <IonToolbar color="primary">
+        <IonToolbar className="FooterLogin" color="primary">
           <IonTitle>© 2025 Fit-Trak</IonTitle>
         </IonToolbar>
       </IonFooter>

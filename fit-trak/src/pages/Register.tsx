@@ -36,8 +36,8 @@ const Register: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar color="primary">
-          <IonTitle>FIT-TRAK</IonTitle>
+        <IonToolbar className="RegisterPage" color="primary">
+          <IonTitle>Fit-Trak</IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -79,8 +79,8 @@ const Register: React.FC = () => {
       </IonContent>
 
       <IonFooter>
-        <IonToolbar color="primary">
-          <IonTitle>© 2025 FIT-TRAK</IonTitle>
+        <IonToolbar className="RegisterFooter" color="primary">
+          <IonTitle>© 2025 Fit-Trak</IonTitle>
         </IonToolbar>
       </IonFooter>
     </IonPage>

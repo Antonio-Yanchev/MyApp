@@ -70,3 +70,19 @@
 .link:hover {
   text-decoration: underline;
 }
+
+.LoginPage{
+  text-align: center;
+}
+
+.FooterLogin{
+  text-align: center;
+}
+
+.RegisterPage{
+  text-align: center;
+}
+
+.RegisterFooter{
+  text-align: center;
+}

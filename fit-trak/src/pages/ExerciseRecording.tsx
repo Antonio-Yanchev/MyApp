@@ -65,7 +65,6 @@ const MET_VALUES: Record<string, number> = {
   walking: 3.5,
   football: 7.0,
   swimming: 8.0,
-  // add more if you like
 };
 
 const chartOptions: ChartOptions<'bar'> = {
@@ -130,6 +129,13 @@ interface PinnedExercise {
 type Tab2Props = {
   user: User;
 };
+
+// A small helper function to take "YYYY-MM-DD" and return "DD/MM/YYYY"
+function formatToUKDate(isoDateString: string) {
+  // isoDateString is something like "2025-03-26"
+  const [year, month, day] = isoDateString.split('-');
+  return `${day}/${month}/${year}`;
+}
 
 const Tab2: React.FC<Tab2Props> = ({ user }) => {
   const [presentAlert] = useIonAlert();
@@ -224,26 +230,39 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
 
   // ===== 4) CREATE NEW EXERCISE =====
   const handleSaveExercise = async () => {
-    if (!userWeight) {
-      alert('Please set your weight in the Profile first!');
+    // 1) Make sure user has weight AND height
+    if (!userWeight || !userHeight) {
+      alert('Please set your weight and height in the Profile first!');
       return;
     }
+
+    // 2) Make sure required inputs are filled
     if (!exerciseName.trim() || !duration.trim() || !dateTime.trim()) {
       alert('Please fill in Exercise Name, Duration, and Date & Time.');
       return;
     }
 
+    const exerciseKey = exerciseName.toLowerCase();
+    const metValue = MET_VALUES[exerciseKey];
+
+    if (!metValue) {
+      alert(
+        'Unknown exercise name. Please use an exercise from MET_VALUES or add a custom MET value.'
+      );
+      return;
+    }
+
     try {
-      const exerciseKey = exerciseName.toLowerCase();
-      const metValue = MET_VALUES[exerciseKey] || 6.0; // fallback if not found
+      // 4) Calculate using recognized MET
       const durationInHours = parseInt(duration, 10) / 60;
       const caloriesBurned = Math.round(metValue * userWeight * durationInHours);
 
+      // 5) Save to Firestore
       await addDoc(collection(db, 'users', user.uid, 'exercises'), {
         userId: user.uid,
         exerciseName,
         duration: parseInt(duration, 10),
-        dateTime,
+        dateTime,  // stored in ISO format
         notes,
         createdAt: serverTimestamp(),
         caloriesBurned,
@@ -315,7 +334,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
 
     try {
       const exerciseKey = exerciseToEdit.exerciseName.toLowerCase();
-      const metValue = MET_VALUES[exerciseKey] || 6.0;
+      const metValue = MET_VALUES[exerciseKey] || 6.0; // fallback or block
       const durationInHours = exerciseToEdit.duration / 60;
       const newCalories = Math.round(metValue * (userWeight || 70) * durationInHours);
 
@@ -420,7 +439,8 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
   // Group main exercises by date
   const groupedExercises: Record<string, ExerciseEntry[]> = {};
   exercises.forEach((entry) => {
-    const datePart = entry.dateTime.split('T')[0];
+    // entry.dateTime is something like 2025-03-26T10:00
+    const datePart = entry.dateTime.split('T')[0]; // "2025-03-26"
     if (!groupedExercises[datePart]) {
       groupedExercises[datePart] = [];
     }
@@ -517,6 +537,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                 <IonDatetime
                   presentation="date-time"
                   value={dateTime}
+                  locale="en-GB"
                   onIonChange={(e) => {
                     const val = Array.isArray(e.detail.value)
                       ? e.detail.value[0]
@@ -554,7 +575,8 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                     <IonCol size="12">
                       <IonCard className="exercise-card">
                         <IonCardHeader>
-                          <IonCardTitle>{date}</IonCardTitle>
+                          {/* Show date in UK format */}
+                          <IonCardTitle>{formatToUKDate(date)}</IonCardTitle>
                         </IonCardHeader>
                         <IonCardContent>
                           {groupedExercises[date].map((entry) => (
@@ -673,7 +695,9 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
           <IonToolbar>
             <IonTitle>
               {selectedExercise
-                ? `${selectedExercise.exerciseName} (${selectedExercise.dateTime.split('T')[0]}) Details`
+                ? `${selectedExercise.exerciseName} (${formatToUKDate(
+                    selectedExercise.dateTime.split('T')[0]
+                  )}) Details`
                 : 'Details'}
             </IonTitle>
           </IonToolbar>
@@ -739,6 +763,7 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                 <IonLabel position="stacked">Date & Time</IonLabel>
                 <IonDatetime
                   presentation="date-time"
+                  locale="en-GB"
                   value={exerciseToEdit.dateTime}
                   onIonChange={(e) => {
                     const val = Array.isArray(e.detail.value)
@@ -756,7 +781,10 @@ const Tab2: React.FC<Tab2Props> = ({ user }) => {
                 <IonTextarea
                   value={exerciseToEdit.notes}
                   onIonChange={(e) =>
-                    setExerciseToEdit({ ...exerciseToEdit, notes: e.detail.value! })
+                    setExerciseToEdit({
+                      ...exerciseToEdit,
+                      notes: e.detail.value!,
+                    })
                   }
                 />
               </IonItem>
