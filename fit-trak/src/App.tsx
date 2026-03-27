@@ -1,4 +1,3 @@
-// App.tsx
 import React, { useState, useEffect } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import {
@@ -11,7 +10,7 @@ import {
   IonContent,
   IonList,
   IonItem,
-  IonMenuToggle,        // <-- IMPORT HERE
+  IonMenuToggle,        
   setupIonicReact,
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';

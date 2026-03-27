@@ -1,8 +1,6 @@
-/* Make sure IonPage can fill the screen but NOT scroll. */
 .tab3-page.no-ion-scroll ion-content {
-  /* Use our own layout scrolling instead of IonContent's scroll */
   height: 100%;
-  ion-background-color: #fff; /* optional override */
+  ion-background-color: #fff; 
 }
 
 /* The parent container for sidebar + main content side-by-side */
@@ -10,18 +8,11 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  /* 
-    Fill the visible area minus header/footer. If your IonHeader is ~56px tall
-    and IonFooter ~44px, you can do something like:
-  */
   height: calc(100vh - var(--ion-safe-area-top) - var(--ion-safe-area-bottom) - 56px - 44px);
-  /* Or if you prefer just 100% of IonContent, you can keep 'height: 100%;' 
-     as well—depends on your visual needs.
-  */
-}
+  }
 
-/* SIDEBAR */
-.tab3-sidebar {
+  /* SIDEBAR */
+  .tab3-sidebar {
   width: 250px;
   background-color: #0066ff;
   color: #fff;
@@ -30,26 +21,26 @@
   box-sizing: border-box;
   padding: 1rem;
 
-  /* Let the sidebar scroll if content is too tall */
-  overflow-y: auto;
-}
 
-/* Title in the sidebar */
-.tab3-page .app-title {
+  overflow-y: auto;
+  }
+
+
+  .tab3-page .app-title {
   font-size: 1.8rem;
   font-weight: bold;
   text-align: center;
   margin-bottom: 1.5rem;
-}
+  }
 
-/* Keep the logout button pinned at bottom of the sidebar */
-.tab3-page .logout-button {
+  /* Keep the logout button pinned at bottom of the sidebar */
+  .tab3-page .logout-button {
   margin-top: auto; 
   width: 100%;
-}
+  }
 
-/* MAIN CONTENT */
-.tab3-main-content {
+  /* MAIN CONTENT */
+  .tab3-main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
