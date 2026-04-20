@@ -1,10 +1,15 @@
 /// <reference types="vitest" />
 
 import type { IncomingMessage } from 'node:http'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { Plugin } from 'vite'
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
+
+/** Directory that contains vite.config.ts and should contain `.env.local` */
+const envDir = path.dirname(fileURLToPath(import.meta.url))
 
 async function readRequestBody(req: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = []
@@ -32,12 +37,12 @@ function devApiProxy(env: Record<string, string>): Plugin {
               res.end('Method Not Allowed')
               return
             }
-            const key = env.USDA_API_KEY
+            const key = env.USDA_API_KEY || env.VITE_USDA_API_KEY
             if (!key) {
               res.statusCode = 500
               res.setHeader('Content-Type', 'text/plain')
               res.end(
-                'Missing USDA_API_KEY in .env.local (use this name, not VITE_USDA_API_KEY).'
+                `Missing USDA key. Add USDA_API_KEY (preferred) or VITE_USDA_API_KEY to: ${path.join(envDir, '.env.local')} then restart npm run dev.`
               )
               return
             }
@@ -63,12 +68,12 @@ function devApiProxy(env: Record<string, string>): Plugin {
               res.end('Method Not Allowed')
               return
             }
-            const openaiKey = env.OPENAI_API_KEY
+            const openaiKey = env.OPENAI_API_KEY || env.VITE_OPENAI_API_KEY
             if (!openaiKey) {
               res.statusCode = 500
               res.setHeader('Content-Type', 'text/plain')
               res.end(
-                'Missing OPENAI_API_KEY in .env.local (use this name, not VITE_OPENAI_API_KEY).'
+                `Missing OpenAI key. Add OPENAI_API_KEY (preferred) or VITE_OPENAI_API_KEY to: ${path.join(envDir, '.env.local')} then restart npm run dev.`
               )
               return
             }
@@ -126,7 +131,7 @@ function devApiProxy(env: Record<string, string>): Plugin {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
+  const env = loadEnv(mode, envDir, '')
 
   return {
     plugins: [react(), legacy(), devApiProxy(env)],
