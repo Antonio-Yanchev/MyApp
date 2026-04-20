@@ -24,6 +24,7 @@ import {
 } from '@ionic/react';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebaseConfig';
+import { callUsdaFoodSearch } from '../services/cloudFunctions';
 import {
   collection,
   addDoc,
@@ -91,26 +92,12 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
     }
   };
 
-  // USDA API Food Search
+  // USDA search via Firebase Callable (API key stored server-side only)
   const handleSearch = async () => {
     if (!queryText) return;
     try {
       setLoading(true);
-
-      const apiKey = import.meta.env.VITE_USDA_API_KEY ?? '';
-      const baseUrl = 'https://api.nal.usda.gov/fdc/v1/foods/search';
-
-      const params = new URLSearchParams({
-        query: queryText,
-        api_key: apiKey,
-      });
-
-      const url = `${baseUrl}?${params.toString()}`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`USDA API error: ${response.statusText}`);
-      }
-      const data = await response.json();
+      const data = await callUsdaFoodSearch(queryText);
 
       if (data.foods) {
         const formattedResults = data.foods.map((food: any) => {
@@ -135,9 +122,15 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
       } else {
         setResults([]);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Search error:', error);
-      alert('Error searching USDA FoodData Central. Check console for details.');
+      const msg =
+        error && typeof error === 'object' && 'message' in error
+          ? String((error as { message: unknown }).message)
+          : 'Unknown error';
+      alert(
+        `Food search failed: ${msg}. Deploy Cloud Functions and sign in, or run the Functions emulator with VITE_FUNCTIONS_EMULATOR=true.`
+      );
     } finally {
       setLoading(false);
     }

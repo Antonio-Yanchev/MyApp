@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
+import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA7qJFxX8SMgGtckhisJ9WLCIAdDifXtDs",
@@ -18,10 +19,15 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const analytics = getAnalytics(app);
+const functions = getFunctions(app, "us-central1");
+
+if (import.meta.env.DEV && import.meta.env.VITE_FUNCTIONS_EMULATOR === "true") {
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+}
 
 // Ensure Firebase persists authentication
 setPersistence(auth, browserLocalPersistence).catch((error) => {
   console.error("Firebase Auth Persistence Error:", error);
 });
 
-export { auth, db };
+export { app, auth, db, functions };

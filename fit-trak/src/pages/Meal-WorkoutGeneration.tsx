@@ -34,6 +34,9 @@ import {
 
 import './Meal-WorkoutGeneration.css';
 
+import { callOpenaiMealWorkout, callUsdaFoodSearch } from '../services/cloudFunctions';
+import { extractMacrosFromUsdaFood } from '../utils/usdaNutrients';
+
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -83,9 +86,6 @@ type Tab3Props = {
 const Tab3: React.FC<Tab3Props> = ({ user }) => {
   const displayName = user.displayName || user.email || 'User';
 
-  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY ?? '';
-  const USDA_API_KEY = import.meta.env.VITE_USDA_API_KEY ?? '';
-
   // ---------- State ----------
   const [ingredients, setIngredients] = useState('');
   const [muscleGroups, setMuscleGroups] = useState('');
@@ -120,41 +120,17 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
 
   // ---------- USDA macros helper ----------
   async function fetchIngredientMacros(
-    ingredientName: string,
-    quantity: string
+    ingredientName: string
   ): Promise<{ protein: number; carbs: number; fat: number; sugars: number }> {
     try {
-      const baseUrl = 'https://api.nal.usda.gov/fdc/v1/foods/search';
-      const params = new URLSearchParams({
-        api_key: USDA_API_KEY,
-        query: ingredientName,
-      });
-
-      const response = await fetch(`${baseUrl}?${params.toString()}`);
-      if (!response.ok) {
-        console.error('USDA response:', response.status, response.statusText);
+      const data = await callUsdaFoodSearch(ingredientName);
+      const foods = data.foods as
+        | Array<{ foodNutrients?: Array<{ nutrientNumber?: string; value?: number }> }>
+        | undefined;
+      if (!foods || foods.length === 0) {
         return { protein: 0, carbs: 0, fat: 0, sugars: 0 };
       }
-
-      const data = await response.json();
-      if (!data.foods || data.foods.length === 0) {
-        return { protein: 0, carbs: 0, fat: 0, sugars: 0 };
-      }
-
-      const food = data.foods[0];
-      const nutrients = food.foodNutrients || [];
-
-      const protein = nutrients.find((n: any) => n.nutrientNumber === '203')?.value || 0;
-      const fat = nutrients.find((n: any) => n.nutrientNumber === '204')?.value || 0;
-      const carbs = nutrients.find((n: any) => n.nutrientNumber === '205')?.value || 0;
-      const sugars = nutrients.find((n: any) => n.nutrientNumber === '269')?.value || 0;
-
-      return {
-        protein: Number(protein),
-        carbs: Number(carbs),
-        fat: Number(fat),
-        sugars: Number(sugars),
-      };
+      return extractMacrosFromUsdaFood(foods[0]);
     } catch (error) {
       console.error('Error fetching macros from USDA:', error);
       return { protein: 0, carbs: 0, fat: 0, sugars: 0 };
@@ -170,7 +146,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
       let totalSugars = 0;
 
       for (const ing of meal.ingredients) {
-        const macros = await fetchIngredientMacros(ing.item, ing.quantity);
+        const macros = await fetchIngredientMacros(ing.item);
         totalProtein += macros.protein;
         totalCarbs += macros.carbs;
         totalFat += macros.fat;
@@ -246,24 +222,10 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
       }
             `;
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4',
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-
-      const data = await response.json();
-      if (!data.choices || data.choices.length === 0) {
+      const { content } = await callOpenaiMealWorkout(prompt);
+      if (!content) {
         throw new Error('No response from OpenAI.');
       }
-
-      const content = data.choices[0].message.content;
       let parsed: ChatGPTResult | null = null;
 
       try {
