@@ -1,36 +1,177 @@
-<h1>Fit-Trak:
-Is a calorie and exercise tracking application that allows users to record their daily food intake, track workouts, and manage personal fitness goals. This project is built with the Ionic Framework and serves as part of my application project dissertation.</h1>
+# Fit-Trak
 
-<h4>1)Features
-Calorie Tracking: Log daily food consumption and calculate total calorie intake.
-Exercise Tracking: Record workouts, including exercise type, duration, and calories burned.
-Progress Visualisation: Charts or summaries to show weekly/monthly progress.
-User Authentication: Secure login and registration (optional, if implemented).
-Responsive UI: Optimised for both mobile and desktop use via Ionic.</h4>
+Fit-Trak is a fitness tracking web app built with Ionic + React. It helps users log nutrition, record exercises, and generate meal/workout plans with AI support.
 
-<h4>2)Tech Stack
-Ionic Framework (TypeScript, HTML, CSS)
-React
-Node.js & npm (for development environment)
-Other Dependencies:
-Ionic CLI
-Additional Ionic libraries (e.g., Ionic Storage, HTTP clients, etc.)</h4>
+This project was created as part of a dissertation application project during the final year of my university life.
 
+## Features
 
-<h4>3)Make sure you have the following installed on your system:
-Node.js (v14+ recommended) and npm (v6+ recommended).
-Ionic CLI globally:
-{npm install -g @ionic/cli}</h4>
+- User authentication with Firebase (register, login, password reset)
+- Nutrition logging with USDA FoodData Central search
+- Daily diary entries with macro summaries (protein, carbs, fat, sugars)
+- Exercise recording with estimated calories burned
+- Pinned/favourite workouts and meals
+- AI-assisted meal and workout generation (OpenAI API)
+- Charts and data visualisation with Chart.js
+- Responsive interface using Ionic components
 
-<h4>4)Installation
-Clone the Repository: git clone https://github.com/<your-username>/<your-repo-name>.git</h4>
+## Tech Stack
 
-<h4>5)Navigate to the Project Directory
-cd: <your-repo-name></h4>
+- Ionic React
+- React + TypeScript
+- Vite
+- Firebase Authentication + Firestore
+- Chart.js + react-chartjs-2
+- Cypress (E2E tests)
+- Vitest + Testing Library (unit tests)
 
-<h4>6)Install Dependencies
-npm install</h4>
+## Project Structure
 
-<h4>7)Usage
-Start the Ionic Development Server
-ionic serve</h4>
+This repository contains the app in:
+
+- `fit-trak/`
+
+Main source code lives under:
+
+- `fit-trak/src/`
+
+## Prerequisites
+
+Install the following before running locally:
+
+- Node.js 18+ (recommended)
+- npm 9+ (recommended)
+- Ionic CLI
+
+Install Ionic CLI globally:
+
+```bash
+npm install -g @ionic/cli
+```
+
+## Getting Started
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/<your-username>/<your-repo-name>.git
+```
+
+2. Move into the app directory:
+
+```bash
+cd <your-repo-name>/fit-trak
+```
+
+3. Install dependencies:
+
+```bash
+npm install
+```
+
+4. Configure environment variables (see next section).
+
+5. Start the development server:
+
+```bash
+npm run dev
+```
+
+## Environment Variables
+
+Create a `.env` file inside `fit-trak/`:
+
+```env
+VITE_OPENAI_API_KEY=your_openai_api_key
+VITE_USDA_API_KEY=your_usda_api_key
+```
+
+Notes:
+
+- `VITE_OPENAI_API_KEY` is required for meal/workout generation.
+- `VITE_USDA_API_KEY` is used for food search and optional macro enrichment.
+- Firebase configuration is currently defined in `fit-trak/src/firebaseConfig.ts`.
+
+## Available Scripts
+
+Run these inside `fit-trak/`:
+
+- `npm run dev` - Start local dev server
+- `npm run build` - Type-check and build production bundle
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint
+- `npm run test.unit` - Run unit tests with Vitest
+- `npm run test.e2e` - Run Cypress end-to-end tests
+
+## Testing
+
+### Unit tests
+
+```bash
+npm run test.unit
+```
+
+### End-to-end tests
+
+```bash
+npm run test.e2e
+```
+
+## Deployment
+
+Build for production:
+
+```bash
+npm run build
+```
+
+For mobile targets, use Capacitor as needed (Android/iOS setup is project-specific).
+
+## Security and Configuration Notes
+
+- Do not commit private API keys to source control.
+- Consider moving Firebase config values to environment variables for cleaner environment separation.
+- Validate Firestore security rules before production deployment.
+
+## Screenshots
+
+### Login
+
+![Login page](assets/images/login-page.png)
+
+### Nutrition Dashboard
+
+![Nutrition overview](assets/images/nutrition-overview.png)
+
+### Nutrition Details Chart
+
+![Nutrition chart modal](assets/images/nutrition-chart-modal.png)
+
+### Exercise Recording
+
+![Exercise recording page](assets/images/exercise-recording-page.png)
+
+### Exercise Details Chart
+
+![Exercise chart modal](assets/images/exercise-chart-modal.png)
+
+### Profile Modal
+
+![Profile modal](assets/images/profile-modal.png)
+
+### Meal and Workout Dashboard
+
+![Meal and workout dashboard](assets/images/meal-workout-dashboard.png)
+
+## Future Improvements
+- Add architecture diagram and data model
+- Add contribution guidelines and issue templates
+- Add CI pipeline status badge
+
+## Author
+
+Anton
+
+## License
+
+Choose and add a license (for example: MIT) if this project will be shared publicly.
