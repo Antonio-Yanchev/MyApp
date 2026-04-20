@@ -24,7 +24,7 @@ import {
 } from '@ionic/react';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebaseConfig';
-import { callUsdaFoodSearch } from '../services/cloudFunctions';
+import { callUsdaFoodSearch, formatCallableError } from '../services/cloudFunctions';
 import {
   collection,
   addDoc,
@@ -92,7 +92,7 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
     }
   };
 
-  // USDA search via Firebase Callable (API key stored server-side only)
+  // USDA: production uses Cloud Functions; `npm run dev` uses Vite proxy + .env.local keys
   const handleSearch = async () => {
     if (!queryText) return;
     try {
@@ -124,13 +124,7 @@ const Tab1: React.FC<NutritionLoggingProps> = ({ user }) => {
       }
     } catch (error: unknown) {
       console.error('Search error:', error);
-      const msg =
-        error && typeof error === 'object' && 'message' in error
-          ? String((error as { message: unknown }).message)
-          : 'Unknown error';
-      alert(
-        `Food search failed: ${msg}. Deploy Cloud Functions and sign in, or run the Functions emulator with VITE_FUNCTIONS_EMULATOR=true.`
-      );
+      alert(`Food search failed: ${formatCallableError(error)}`);
     } finally {
       setLoading(false);
     }

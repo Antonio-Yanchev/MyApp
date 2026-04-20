@@ -34,7 +34,11 @@ import {
 
 import './Meal-WorkoutGeneration.css';
 
-import { callOpenaiMealWorkout, callUsdaFoodSearch } from '../services/cloudFunctions';
+import {
+  callOpenaiMealWorkout,
+  callUsdaFoodSearch,
+  formatCallableError,
+} from '../services/cloudFunctions';
 import { extractMacrosFromUsdaFood } from '../utils/usdaNutrients';
 
 import { Pie } from 'react-chartjs-2';
@@ -248,7 +252,7 @@ const Tab3: React.FC<Tab3Props> = ({ user }) => {
       setWorkoutPlan(parsed.workout);
     } catch (err) {
       console.error(err);
-      alert((err as Error).message);
+      alert(formatCallableError(err));
     } finally {
       setLoading(false);
     }
