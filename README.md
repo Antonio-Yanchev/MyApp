@@ -170,8 +170,4 @@ For mobile targets, use Capacitor as needed (Android/iOS setup is project-specif
 
 ## Author
 
-Anton
-
-## License
-
-Choose and add a license (for example: MIT) if this project will be shared publicly.
+Antonio Yanchev
